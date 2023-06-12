@@ -7,7 +7,7 @@ module.exports= (sequelize)=> {
             allowNull: false
         },
         items: {
-            type: DataTypes.ARRAY(DataTypes.JSON),
+            type: DataTypes.ARRAY(DataTypes.JSON),  //recibiria como dato el name de la pieza, color, cantidad
             defaultValue: []
       }
     })
