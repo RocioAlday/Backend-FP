@@ -46,6 +46,11 @@ const logOutUserCtr= async (token) => {
 
        return user.id;
     }
+};
+
+const getUsers= async()=> {
+    const users= await User.findAll();
+    return users;
 }
 
-module.exports= { userCreation, userLogin, logOutUserCtr };
+module.exports= { userCreation, userLogin, logOutUserCtr, getUsers };
