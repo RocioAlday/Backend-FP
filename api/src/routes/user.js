@@ -1,12 +1,12 @@
 const Router= require('express');
 
-const { newUser }= require('../handlers/user.handlers');
+const { newUser, loginUser }= require('../handlers/user.handlers');
 
 const router= Router();
 
 //POST DE USER:
 router.post("/register", newUser);
-
+router.post("/login", loginUser);
 
 
 

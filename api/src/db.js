@@ -5,7 +5,7 @@ const path= require('path');
 const {
     DB_USER, DB_PASSWORD, DB_HOST
 } = process.env;
-  
+const bcrypt= require('bcrypt');
 
 //Acá iria la instancia de sequelize con los datos que tengo en env
 const sequelize = new Sequelize(`postgres://${DB_USER}:${DB_PASSWORD}@localhost:${DB_HOST}/fullprism`, {
@@ -32,6 +32,11 @@ let capsEntries = entries.map((entry) => [entry[0][0].toUpperCase() + entry[0].s
 sequelize.models = Object.fromEntries(capsEntries);
 
 const { User, Cart, Order, Model, OrderDetail }= sequelize.models;
+
+User.prototype.passwordMatched= async(password, passwordEntered)=>{
+  const result= await bcrypt.compare(passwordEntered, password);
+  return result; //if matched, it returns true, otherwise it will return false
+};
 
 // Aca vendrian las relaciones
 Cart.belongsTo(User, {foreignKey: 'userId' });
