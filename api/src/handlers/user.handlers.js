@@ -1,4 +1,4 @@
-const { userCreation, userLogin, logOutUserCtr }= require('../controllers/user.controllers');
+const { userCreation, userLogin, logOutUserCtr, getUsers }= require('../controllers/user.controllers');
 
 const newUser= async (req, res)=> {
     const { companyName, firstname, lastname, email, phone, image, password, status }= req.body;
@@ -46,8 +46,19 @@ const logoutUser= async (req, res)=> {
 
     } catch (error) {
         res.status(500).json({ error: 'Error in user Logout', message: error.message })
-    }
+    }   
+};
+
+const allUsers= async (req, res)=> {
     
+    try {
+        const users= await getUsers();
+        res.status(200).send(users);
+    
+    } catch(error) {
+        res.status(500).json({ message: 'Can not get all users', error: error.message});
+    }
 }
 
-module.exports= { newUser, loginUser, logoutUser }
+
+module.exports= { newUser, loginUser, logoutUser, allUsers }
