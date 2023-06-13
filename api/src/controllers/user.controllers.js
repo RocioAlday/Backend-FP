@@ -31,10 +31,21 @@ const userLogin= async (email, password)=> {
         const updateUser= await findUser.update({refreshToken: newToken});
         
         return updateUser.dataValues;
-        
+
     } else {
         throw new Error ('Invalid Credentials')
     }
+};
+
+const logOutUserCtr= async (token) => {
+    const user= await User.findOne( {where: { refreshToken: token }});
+    if(user) {
+       await user.update({
+        refreshToken: ""
+       });
+
+       return user.id;
+    }
 }
 
-module.exports= { userCreation, userLogin };
+module.exports= { userCreation, userLogin, logOutUserCtr };
