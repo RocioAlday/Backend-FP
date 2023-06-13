@@ -11,7 +11,7 @@ module.exports= (sequelize)=> {
         },
         companyName: {
             type: DataTypes.STRING,
-            field: "Company",
+            field: "CompanyName",
             allowNull: false,
         },
         firstname: {
