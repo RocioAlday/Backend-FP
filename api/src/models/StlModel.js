@@ -1,5 +1,5 @@
 const { DataTypes } = require('sequelize');
-const { Material } = require("../utils/dataTypes");
+const { Material, PriceType } = require("../utils/dataTypes");
 
 module.exports= (sequelize)=> {
     sequelize.define('model', {
@@ -7,7 +7,7 @@ module.exports= (sequelize)=> {
             type: DataTypes.INTEGER,
             autoIncrement: true,
             primaryKey: true,
-            field: 'Id'
+            field: 'id'
         },
         name: {
             type: DataTypes.STRING,
