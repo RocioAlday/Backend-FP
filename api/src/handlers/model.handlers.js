@@ -8,7 +8,7 @@ const newSTLModel= async(req, res)=> {
         res.status(200).json(model);
 
     } catch(error) {
-
+        res.status(500).json({ error: 'Error in STL-Model Creation', message: error.message });
     }
 };
 
