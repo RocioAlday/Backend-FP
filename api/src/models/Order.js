@@ -7,7 +7,7 @@ module.exports= (sequelize)=> {
             type: DataTypes.INTEGER,
             autoIncrement: true,
             primaryKey: true,
-            field: 'Id'
+            field: 'id'
         },
         cartId: {
             type: DataTypes.INTEGER,
