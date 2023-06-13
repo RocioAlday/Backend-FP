@@ -1,4 +1,5 @@
 const { User }= require('../db');
+const { hashPassword }= require('../config/hashPassword');
 
 const userCreation= async(companyName, firstname, lastname, email, phone, image, password, status)=> {
     const user= await User.findOne({ where : { email: email } });
@@ -14,7 +15,11 @@ const userCreation= async(companyName, firstname, lastname, email, phone, image,
         password,
         status
     });
-    return userCreate;
+
+    const hashPass= await hashPassword(userCreate); 
+    const finalUser= await userCreate.update({ password: hashPass });
+
+    return finalUser.dataValues;
 }
 
 module.exports= { userCreation };
