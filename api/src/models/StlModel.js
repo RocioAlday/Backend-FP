@@ -24,6 +24,11 @@ module.exports= (sequelize)=> {
         },
         price: {
             type: PriceType
+        },
+        companyName: {
+            type: DataTypes.STRING,
+            allowNull: false,
+            field: 'companyName'
         }
     })
 }
