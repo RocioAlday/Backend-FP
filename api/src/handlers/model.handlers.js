@@ -1,10 +1,10 @@
 const { createModel, getAllModels, getModelsByCompany } = require('../controllers/model.controllers');
 
 const newSTLModel= async(req, res)=> {
-    const { name, material, link, price, companyName }= req.body;
+    const { name, material, link, price, companyName, image }= req.body;
 
     try {
-        const model= await createModel(name, material, link, price, companyName);
+        const model= await createModel(name, material, link, price, companyName, image);
         res.status(200).json(model);
 
     } catch(error) {
