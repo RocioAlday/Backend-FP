@@ -29,6 +29,10 @@ module.exports= (sequelize)=> {
             type: DataTypes.STRING,
             allowNull: false,
             field: 'companyName'
+        },
+        image: {
+            type: DataTypes.TEXT,
+            field: 'image'
         }
     })
 }
