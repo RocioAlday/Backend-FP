@@ -25,11 +25,13 @@ const userCreation= async(companyName, firstname, lastname, email, phone, image,
 
 const userLogin= async (email, password)=> {
     const findUser= await User.findOne({ where: { email: email } });
+    console.log(findUser);
+    console.log(await findUser.passwordMatched(findUser.password, password));
 
     if (findUser && await findUser.passwordMatched(findUser.password, password)) {
         const newToken= generateRefreshToken(findUser.id);
         const updateUser= await findUser.update({refreshToken: newToken});
-        
+        console.log(updateUser.dataValues);
         return updateUser.dataValues;
 
     } else {

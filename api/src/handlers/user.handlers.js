@@ -12,6 +12,8 @@ const newUser= async (req, res)=> {
 
 const loginUser= async (req, res)=> {
     const { email, password }= req.body;
+    console.log(email, password);
+    console.log(req.body);
     try{
         const loginData= await userLogin(email, password);
         const token= loginData.refreshToken;
@@ -29,20 +31,21 @@ const loginUser= async (req, res)=> {
 };
 
 const logoutUser= async (req, res)=> {
-
-    const cookies= req.cookies;
-
+   
+    let token= req.headers.authorization.split(" ")[1];
+   
     try{
-        if(!cookies.refreshToken) throw new Error ('No RefreshToken in cookies');
-        const token= cookies.refreshToken;
-        const userlogOut= await logOutUserCtr(token);
+        if(token){
+            const userlogOut= await logOutUserCtr(token);
 
-        res.clearCookie('refreshToken', {
-            httpOnly: true,
-            secure: true,
-        });
+            res.clearCookie('refreshToken', {
+                httpOnly: true,
+                secure: true,
+            });
+            res.status(200).send({userId:userlogOut});
+    
+        } else throw new Error ('No RefreshToken in cookies');
 
-        res.status(200).send({userId:userlogOut}); 
 
     } catch (error) {
         res.status(500).json({ error: 'Error in user Logout', message: error.message })
