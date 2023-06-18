@@ -1,4 +1,19 @@
 const { createModel, getAllModels, getModelsByCompany } = require('../controllers/model.controllers');
+const models = require('../utils/modelsPrueba');
+const { Model }= require('../db');
+
+
+const createModelsDB= async (req, res)=> {
+    try {
+        console.log(models[1]);
+        await Promise.all(models.map(async (el) => { 
+          await Model.create(el);
+        })); 
+  
+       res.status(201).send("Modelos Creados en DB")
+      }
+      catch(error) {res.status(500).json(console.log(error))}
+};
 
 const newSTLModel= async(req, res)=> {
     const { name, material, link, price, companyName, image }= req.body;
@@ -56,4 +71,4 @@ const companyModels= async (req, res)=> {
 //     }
 // }
 
-module.exports= { newSTLModel, allModels, companyModels };
+module.exports= { newSTLModel, allModels, companyModels, createModelsDB };
