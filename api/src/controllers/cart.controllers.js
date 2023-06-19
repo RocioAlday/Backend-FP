@@ -3,9 +3,9 @@ const { Cart, User, Model }= require('../db');
 const getCartByUser= async(token)=> {
     if (token){
         const decoded= jwt.verify(token, process.env.JWT_SECRET);
-        // console.log(decoded);
+        console.log(decoded);
         const findUser= await User.findByPk(decoded?.id); 
-   
+        // const findUser= await User.findOne({where: {refreshToken: token}});
         const cart = await Cart.findOne({ where: { userId: findUser.id } });
         console.log('cartUser:' , cart);
     
