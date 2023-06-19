@@ -25,9 +25,9 @@ const modifyCart = async (req, res) => {
   if(req?.headers?.authorization?.startsWith('Bearer')){
     var token= req.headers.authorization.split(" ")[1];
   }
-  // var token = req.cookies.refreshToken; 
+  //  var token = req.cookies.refreshToken; 
   // console.log(token);
-  // const product = req.body.product;
+   const product = req.body.product;
 
     try {
       var cart= await getCartByUser(token);
@@ -39,7 +39,7 @@ const modifyCart = async (req, res) => {
         // console.log('itemsCart:', itemsCart);
 
         if(itemsCart.length>0){
-          var modifyItem= {id: itemsCart[0].id, quantity: itemsCart[0].quantity + product.quantity};
+          var modifyItem= {id: itemsCart[0].id, quantity: product.quantity};
           let restItems= findCartDB.items.filter(el => el.id !== modifyItem.id);
           let newItems = restItems.concat(modifyItem);
           await findCartDB.update({items: newItems});
@@ -59,8 +59,11 @@ const modifyCart = async (req, res) => {
     
    
     } catch (error) {
-      res.status(500).json({ error: 'Error in cart modifying', message: error.message })
+      res.status(500).json({ error: 'Error adding item on Cart', message: error.message })
     }
   };
+
+
+
 
   module.exports= { getCart, modifyCart };
