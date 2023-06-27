@@ -26,9 +26,9 @@ const modifyCart = async (req, res) => {
     var token= req.headers.authorization.split(" ")[1];
   }
   //  var token = req.cookies.refreshToken; 
-   console.log(token);
+  //  console.log(token);
    const product = req.body.product;
-  console.log(product);
+  // console.log(product);
     try {
       var cart= await getCartByUser(token);
       // console.log('HANDLER CART', cart);
@@ -42,6 +42,7 @@ const modifyCart = async (req, res) => {
           var modifyItem= {id: itemsCart[0].id, quantity: product.quantity};  // si el quantity resultante es cero lo tengo q eliminar !
           let restItems= findCartDB.items.filter(el => el.id !== modifyItem.id);
           let newItems = restItems.concat(modifyItem);
+          newItems= newItems.filter(i=> i.quantity !== 0);
           await findCartDB.update({items: newItems});
           const updateCart= await Cart.findOne({where: {userId: cart.userId}});
        
