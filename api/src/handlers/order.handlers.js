@@ -1,4 +1,4 @@
-const { newOrder } = require("../controllers/order.controller");
+const { newOrder, deleteInOrder } = require("../controllers/order.controller");
 
 const createOrder= async(req, res)=> {
     let token= req.headers.authorization;
@@ -40,42 +40,24 @@ const modifyOrder= async(req, res)=>{
 }
 
 
+const deleteItemOrder= async(req, res)=> {
+    let token= req.headers.authorization;
 
-// async function approveOrder(orderId) {
-//     const order = await Order.findOne({ 
-//       where: { id: orderId },
-//       include: [
-//         {
-//           model: Videogame,
-//           through: {
-//             model: OrdersDetail,
-//             attributes: ['quantity', 'subtotal']
-//           }
-//         }
-//       ]
-//     });
-//      //console.log(order);
-  
-//     if (!order) {
-//       throw new Error ('No se encontró la orden');
-//     };
-  
-//     let allVideogames= await Videogame.findAll();
-   
-//     const videogamesOrder= order.videogames.map(v => ({
-//       id: v.id,
-//       quantity: v.OrdersDetail.quantity
-//     }));
-  
-//     videogamesOrder.forEach(async (v) => {
-//       const product= allVideogames.find( p=> p.dataValues.id === v.id );
-//       if (product.dataValues.stock < 1) throw new Error (`Without Stock of: "${product.dataValues.name}" videogame`);
-//       product.dataValues.stock -= v.quantity; 
-//       const findVideogame= await Videogame.findByPk(product.dataValues.id);
-//       await findVideogame.update({
-//         stock: product.dataValues.stock
-//       });
-//     });
+    if(req?.headers?.authorization?.startsWith('Bearer')){
+        token= req.headers.authorization.split(" ")[1] 
+        
+        try{
+            const newOrder= await deleteInOrder(token);
+            res.status(200).json(newOrder);
+
+        } catch(error){
+        res.status(500).json({error: 'Error geting order', message: error.message})
+        }
+    } else {
+        res.status(500).send('There is no token attached to header');
+    }
+
+}
 
 
-module.exports= {createOrder, modifyOrder}
+module.exports= {createOrder, modifyOrder, deleteItemOrder}

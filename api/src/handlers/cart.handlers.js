@@ -39,7 +39,7 @@ const modifyCart = async (req, res) => {
         // console.log('itemsCart:', itemsCart);
 
         if(itemsCart.length>0){
-          var modifyItem= {id: itemsCart[0].id, quantity: product.quantity};  // si el quantity resultante es cero lo tengo q eliminar !
+          var modifyItem= {id: itemsCart[0].id, quantity: product.quantity}; 
           let restItems= findCartDB.items.filter(el => el.id !== modifyItem.id);
           let newItems = restItems.concat(modifyItem);
           newItems= newItems.filter(i=> i.quantity !== 0);
@@ -49,7 +49,7 @@ const modifyCart = async (req, res) => {
           return res.status(201).json(updateCart);
         }
       
-      } if (product) {
+      } if (product && product.quantity>0) {
           let newItems= [...findCartDB.items, product];
           await findCartDB.update({ items: newItems });
           let updateCart= await Cart.findOne({where: {userId: cart.userId}});
