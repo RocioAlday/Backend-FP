@@ -1,4 +1,4 @@
-const { newOrder, deleteInOrder } = require("../controllers/order.controller");
+const { newOrder, deleteInOrder, changeOrderStatus } = require("../controllers/order.controller");
 
 const createOrder= async(req, res)=> {
     let token= req.headers.authorization;
@@ -59,5 +59,23 @@ const deleteItemOrder= async(req, res)=> {
 
 }
 
+const changeStatus= async(req, res)=> {
+    let token= req.headers.authorization;
+    let {status}= req.body;
+    if(req?.headers?.authorization?.startsWith('Bearer')){
+        token= req.headers.authorization.split(" ")[1] 
+        
+        try{
+            const orderStatus= await changeOrderStatus(token, status);
+            res.status(200).json(orderStatus);
 
-module.exports= {createOrder, modifyOrder, deleteItemOrder}
+        } catch(error){
+        res.status(500).json({error: 'Error changing order status', message: error.message})
+        }
+    } else {
+        res.status(500).send('There is no token attached to header');
+    }
+}
+
+
+module.exports= {createOrder, modifyOrder, deleteItemOrder, changeStatus}

@@ -76,8 +76,19 @@ const deleteInOrder= async(token)=> {
     }
 }
 
+const changeOrderStatus= async(token, status)=> {
+    if (token){
+        const decoded= jwt.verify(token, process.env.JWT_SECRET);
+        const findUser= await User.findByPk(decoded?.id); 
+        const cartUser= await Cart.findOne({where: {userId: findUser.id}});
+        let order= await Order.findOne({where: {cartId: cartUser.id}});
+        await order.update({status: status});
+        return await Order.findOne({where: {id: order.id}});
+    }
+}
 
 
 
 
-module.exports= {newOrder, deleteInOrder}
+
+module.exports= {newOrder, deleteInOrder, changeOrderStatus}
