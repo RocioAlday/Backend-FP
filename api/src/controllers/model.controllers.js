@@ -40,7 +40,20 @@ const getModelsByName= async (token, name)=> {
     return findModels;
 }
     
-   
+const modifyModelCtrl= async(id, name, material, link, price, companyName, image) => {
+    
+    await Model.update({
+        name,
+        material,
+        link,
+        price,
+        companyName,
+        image
+    }, { where: {id: id} });
+
+    const findModel= await Model.findByPk(id);
+    return findModel;
+}
 
 
-module.exports= { createModel, getAllModels, getModelsByCompany, getModelsByCompany, getModelsByName };
+module.exports= { createModel, getAllModels, getModelsByCompany, getModelsByCompany, getModelsByName, modifyModelCtrl };

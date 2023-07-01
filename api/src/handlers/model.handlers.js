@@ -1,4 +1,4 @@
-const { createModel, getAllModels, getModelsByCompany, getModelsByName } = require('../controllers/model.controllers');
+const { createModel, getAllModels, getModelsByCompany, getModelsByName,  modifyModelCtrl } = require('../controllers/model.controllers');
 const models = require('../utils/modelsPrueba');
 const { Model }= require('../db');
 
@@ -36,6 +36,18 @@ const allModels= async(req, res)=> {
         res.status(500).json({ error: 'Error Getting AllModels', message: error.message });
     }
 };
+
+const modifyModel= async(req, res)=> {
+
+    let {id, name, material, link, price, companyName, image }= req.body;
+
+    try {
+        const modelModified= await modifyModelCtrl(id, name, material, link, price, companyName, image);
+        res.status(200).json(modelModified);
+    } catch(error) {
+        res.status(500).json({ error: 'Error Modifyng model', message: error.message });
+    }
+}
 
 const companyModels= async (req, res)=> {
     
@@ -81,4 +93,4 @@ const modelsByName= async (req, res)=> {
 
 
 
-module.exports= { newSTLModel, allModels, companyModels, createModelsDB, modelsByName };
+module.exports= { newSTLModel, allModels, companyModels, createModelsDB, modelsByName, modifyModel };
