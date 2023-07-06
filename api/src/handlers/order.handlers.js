@@ -1,4 +1,4 @@
-const { newOrder, deleteInOrder, changeOrderStatus } = require("../controllers/order.controller");
+const { newOrder, deleteInOrder, changeOrderStatus, getOrderDetail, changeStatusOD, ordersForBilling } = require("../controllers/order.controller");
 
 const createOrder= async(req, res)=> {
     let token= req.headers.authorization;
@@ -77,5 +77,32 @@ const changeStatus= async(req, res)=> {
     }
 }
 
+const getOrders= async(req, res)=> {
+    try{
+        const detailOrder= await getOrderDetail();
+        res.status(200).json(detailOrder)
+    } catch(error){
+        res.status(500).json({error: 'Error geting all orders', message: error.message})
+    }
+}
 
-module.exports= {createOrder, modifyOrder, deleteItemOrder, changeStatus}
+const changeStatusOrderDetail= async (req, res)=> {
+    let { status, orderId, modelId }= req.body;
+    try{
+        const changeStatus= await changeStatusOD(status, orderId, modelId);
+        res.status(200).json(changeStatus)
+    } catch(error){
+        res.status(500).json({error: 'Error changing status in OrderDetail', message: error.message})
+    }
+}
+
+const getOrdersForBilling= async(req, res)=> {
+    try {
+        const orders= await ordersForBilling();
+        res.status(200).json(orders);
+    } catch(error){
+        res.status(500).json({error: 'Error getting orders for billing', message: error.message})
+    }
+}
+
+module.exports= {createOrder, modifyOrder, deleteItemOrder, changeStatus, getOrders, changeStatusOrderDetail, getOrdersForBilling }

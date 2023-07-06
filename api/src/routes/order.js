@@ -1,6 +1,6 @@
 const Router= require('express');
 
-const { createOrder, modifyOrder, deleteItemOrder, changeStatus  } = require('../handlers/order.handlers');
+const { createOrder, modifyOrder, deleteItemOrder, changeStatus, getOrders  } = require('../handlers/order.handlers');
 
 const router= Router();
 
