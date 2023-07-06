@@ -2,12 +2,14 @@ const { User }= require('../db');
 const { hashPassword }= require('../config/hashPassword');
 const { generateRefreshToken }= require('../config/generateRefreshToken');
 
-const userCreation= async(companyName, firstname, lastname, email, phone, image, password, status)=> {
+const userCreation= async(companyName, companyCUIT, taxCondition, firstname, lastname, email, phone, image, password, status)=> {
     const user= await User.findOne({ where : { email: email } });
     if (user) throw new Error ('This e-mail is already in use, please use another email');
 
     const userCreate= await User.create({
         companyName,
+        companyCUIT,
+        taxCondition,
         firstname,
         lastname,
         email,

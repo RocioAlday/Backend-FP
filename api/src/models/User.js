@@ -14,6 +14,15 @@ module.exports= (sequelize)=> {
             field: "CompanyName",
             allowNull: false,
         },
+        companyCUIT: {
+            type: DataTypes.STRING,
+            field: "CompanyCUIT",
+            allowNull: false
+        },
+        taxCondition: {
+            type: DataTypes.STRING,
+            field: "TaxCondition"
+        },
         firstname: {
             type: DataTypes.STRING,
             field: "Firstname",

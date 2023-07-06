@@ -21,10 +21,12 @@ module.exports= (sequelize)=> {
             field: 'TotalBudget'
         },
         status: {
-            type: DataTypes.ENUM("Pending", "Confirmed", "Printing", "Print finished", "Delivered"),
+            type: DataTypes.ENUM("Pendiente", "Confirmado", "Impresión Finalizada", "Entregado", "Facturado", "Cobrado"),
             allowNull: false,
-            defaultValue: "Pending",
+            defaultValue: "Pendiente",
             field: "Status",
-        }
+        },
+
+
     })
 }

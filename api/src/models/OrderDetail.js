@@ -31,9 +31,18 @@ module.exports = (sequelize) => {
       type: DataTypes.FLOAT,
       allowNull: false
     },
+    color: {
+      type: DataTypes.TEXT,
+    },
     observations: {
         type: DataTypes.TEXT,
         field: 'observations'
+    },
+    status: {
+        type: DataTypes.ENUM("Confirmado", "Impresión Finalizada"),
+        allowNull: false,
+        defaultValue: "Confirmado",
+        field: "status",
     }
   });
 

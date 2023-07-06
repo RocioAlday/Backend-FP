@@ -39,7 +39,7 @@ const modifyCart = async (req, res) => {
         // console.log('itemsCart:', itemsCart);
 
         if(itemsCart.length>0){
-          var modifyItem= {id: itemsCart[0].id, quantity: product.quantity}; 
+          var modifyItem= {id: itemsCart[0].id, quantity: product.quantity, color: product.color}; 
           let restItems= findCartDB.items.filter(el => el.id !== modifyItem.id);
           let newItems = restItems.concat(modifyItem);
           newItems= newItems.filter(i=> i.quantity !== 0);

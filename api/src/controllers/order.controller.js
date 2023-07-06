@@ -29,7 +29,7 @@ const newOrder= async(token) => {
             cartModels.push(model);
             const subtotal= item.quantity * model.price;
             await order.addModel(model, {
-                through: {quantity: item.quantity, subtotal: subtotal}
+                through: {quantity: item.quantity, subtotal: subtotal, color: item.color}
             })
         }
         console.log(cartModels);
@@ -48,7 +48,7 @@ const newOrder= async(token) => {
                 model: Model,
                 through: {
                   model: OrderDetail,
-                  attributes: ['quantity', 'subtotal']
+                  attributes: ['quantity', 'subtotal', 'color']
                 }
               }
             ]
@@ -87,8 +87,55 @@ const changeOrderStatus= async(token, status)=> {
     }
 }
 
+const changeStatusOD= async(status, orderId, modelId)=> {
+    let findOrderDetail= await OrderDetail.findOne({where: {orderId: orderId, modelId: modelId}});
+    await findOrderDetail.update({status: status});
+    const newOrderDetail= await OrderDetail.findOne({where: {orderId: orderId, modelId: modelId}});
+    const filterByOrder= await OrderDetail.findAll({where: {orderId: orderId}});
+    const anyStatusPending= filterByOrder.filter(m=> m.status !== 'Impresión Finalizada');
+    if(!anyStatusPending){
+        let order= await Order.findByPk(orderId);
+        await order.update({status: 'Impresión Finalizada'})
+    } 
+    
+    return newOrderDetail;
+}
+
+const getOrderDetail= async()=> {
+
+    const detailOrder= await Order.findAll({ 
+        include: [
+          {
+            model: Model,
+            through: {
+              model: OrderDetail,
+              attributes: ['quantity', 'subtotal', 'color']
+            }
+          }
+        ]
+      });
+
+      return detailOrder;
+
+}
+
+const ordersForBilling= async()=> {
+    const findOrders= await Order.findAll({
+    where: {status: 'Impresión Finalizada'},
+    include: [
+        {
+          model: Model,
+          through: {
+            model: OrderDetail,
+            attributes: ['quantity', 'subtotal']
+          }
+        }
+      ]
+    });
+
+    return findOrders;
+}
 
 
 
-
-module.exports= {newOrder, deleteInOrder, changeOrderStatus}
+module.exports= {newOrder, deleteInOrder, changeOrderStatus, getOrderDetail, changeStatusOD, ordersForBilling}
