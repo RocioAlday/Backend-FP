@@ -2,16 +2,12 @@ const { DataTypes } = require('sequelize');
 const { PriceType } = require('../utils/dataTypes');
 
 module.exports= (sequelize)=> {
-    sequelize.define('order', {
+    sequelize.define('orderConfirmed', {
         id: {
             type: DataTypes.INTEGER,
             autoIncrement: true,
             primaryKey: true,
             field: 'id'
-        },
-        cartId: {
-            type: DataTypes.INTEGER,
-            allowNull: false
         },
         userId: {
             type: DataTypes.INTEGER,
@@ -21,16 +17,14 @@ module.exports= (sequelize)=> {
             field: 'TotalBudget'
         },
         status: {
-            type: DataTypes.ENUM("Pendiente", "Confirmado"),
+            type: DataTypes.ENUM("Confirmado", "Impresión Finalizada", "Entregado", "Facturado", "Cobrado", "Cerrada"),
             allowNull: false,
-            defaultValue: "Pendiente",
+            defaultValue: "Confirmado",
             field: "Status",
         },
-        observations: {
-            type: DataTypes.TEXT,
-            field: 'observations'
-        }
-
-
+        dataDetail: {
+            type: DataTypes.ARRAY(DataTypes.JSON), 
+            defaultValue: []
+      }
     })
 }

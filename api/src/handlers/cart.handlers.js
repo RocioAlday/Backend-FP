@@ -1,5 +1,5 @@
 const {Cart, Model} = require('../db');
-const { getCartByUser }= require('../controllers/cart.controllers');
+const { getCartByUser, eliminateCart }= require('../controllers/cart.controllers');
 
 
 const getCart = async (req, res) => {
@@ -64,7 +64,17 @@ const modifyCart = async (req, res) => {
     }
   };
 
+const deleteCart= async(req, res)=> {
+  if(req?.headers?.authorization?.startsWith('Bearer')){
+    var token= req.headers.authorization.split(" ")[1];
+  }
+  try{
+    await eliminateCart(token);
+    res.status(200).json({message: 'Cart Empty'})
+  } catch (error) {
+    res.status(500).json({ error: 'Error deleting Cart', message: error.message })
+  }
+}
 
 
-
-  module.exports= { getCart, modifyCart };
+  module.exports= { getCart, modifyCart, deleteCart };
