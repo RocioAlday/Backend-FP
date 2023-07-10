@@ -1,4 +1,4 @@
-const { User, Cart, Order, Model, OrderDetail }= require('../db');
+const { User, Cart, Order, Model, OrderDetail, OrderConfirmed }= require('../db');
 const jwt= require('jsonwebtoken');
 
 const newOrder= async(token) => {
@@ -76,6 +76,18 @@ const deleteInOrder= async(token)=> {
     }
 }
 
+const deleteOrderCtrl= async(token, orderId)=> {
+  if (token){
+    const decoded= jwt.verify(token, process.env.JWT_SECRET);
+    const findUser= await User.findByPk(decoded?.id); 
+    const cartUser= await Cart.findOne({where: {userId: findUser.id}});
+    let order= await Order.findOne({where: {id: orderId}});
+    await order.destroy();
+    await cartUser.update({items: []});
+    return;
+  }
+}
+
 const changeOrderStatus= async(token, status)=> {
     if (token){
         const decoded= jwt.verify(token, process.env.JWT_SECRET);
@@ -88,54 +100,118 @@ const changeOrderStatus= async(token, status)=> {
 }
 
 const changeStatusOD= async(status, orderId, modelId)=> {
-    let findOrderDetail= await OrderDetail.findOne({where: {orderId: orderId, modelId: modelId}});
-    await findOrderDetail.update({status: status});
-    const newOrderDetail= await OrderDetail.findOne({where: {orderId: orderId, modelId: modelId}});
-    const filterByOrder= await OrderDetail.findAll({where: {orderId: orderId}});
-    const anyStatusPending= filterByOrder.filter(m=> m.status !== 'Impresión Finalizada');
-    if(!anyStatusPending){
-        let order= await Order.findByPk(orderId);
-        await order.update({status: 'Impresión Finalizada'})
-    } 
-    
-    return newOrderDetail;
+  let findOrder= await OrderConfirmed.findOne({where: {id: orderId}});
+  let detail= findOrder.dataDetail;
+  let restOfModels= detail.filter(d=> d.modelId !== modelId);  
+  let filterByModel= detail.filter(d=> d.modelId === modelId);
+  filterByModel[0].status === status;
+
+  const resultDetail= restOfModels.concat(filterByModel);
+
+  const anyStatusPending= resultDetail.filter(m=> m.status !== 'Impresión Finalizada');
+
+  if(!anyStatusPending){
+      await findOrder.update({status: 'Impresión Finalizada'})
+  } 
+
+  await findOrder.update({dataDetail: resultDetail});
+  return resultDetail;
 }
 
-const getOrderDetail= async()=> {
 
-    const detailOrder= await Order.findAll({ 
-        include: [
-          {
-            model: Model,
-            through: {
-              model: OrderDetail,
-              attributes: ['quantity', 'subtotal', 'color']
-            }
-          }
-        ]
-      });
+const getOrderDetail = async () => {
+  const orders = await OrderConfirmed.findAll();
+  const ordersDetail = await Promise.all(
+    orders.map(async (o) => {
+      const dataDetail = await Promise.all(
+        o.dataDetail.map(async (detail) => {
+          const modelId = detail.modelId;
+          const modelData = await Model.findOne({ where: { id: modelId } });
+          const modelDataValues = modelData.dataValues;
+          return { ...detail, ...modelDataValues };
+        })
+      );
+      return {
+        orderId: o.dataValues.id,
+        userId: o.dataValues.userId,
+        totalBudget: o.dataValues.totalBudget,
+        status: o.dataValues.status,
+        fechaSolicitud: o.dataValues.createdAt,
+        detailModels: dataDetail
+      };
+    })
+  );
+  return ordersDetail;
+};
 
-      return detailOrder;
 
+const confirmedOrder= async(token, orderId, status)=> {
+  const decoded= jwt.verify(token, process.env.JWT_SECRET);
+  const findUser= await User.findByPk(decoded?.id); 
+  const order= await Order.findByPk(orderId);
+  const orderDetail= await OrderDetail.findAll({where: {orderId: order.id}});
+  const details= orderDetail.map((d)=> {
+    return ({
+    modelId: d.modelId,
+    quantity: d.quantity,
+    subtotal: d.subtotal,
+    color: d.color,
+    status: d.status 
+   })
+  })
+ 
+  if(order && orderDetail){
+    var orderConfirmed = await OrderConfirmed.create({
+        userId: findUser.id,
+        totalBudget: order.totalBudget,
+        status: status,
+        dataDetail: details
+    });
+  }
+
+  return orderConfirmed;
+}
+
+const ordersByUser= async(token)=> {
+  const decoded= jwt.verify(token, process.env.JWT_SECRET);
+  const findUser= await User.findByPk(decoded?.id); 
+  const order= await OrderConfirmed.findAll({where: {userId : findUser.id}});
+  const openOrders= order.filter(o=> o.status !== 'Cerrada');
+  
+  return openOrders;
 }
 
 const ordersForBilling= async()=> {
-    const findOrders= await Order.findAll({
-    where: {status: 'Impresión Finalizada'},
-    include: [
-        {
-          model: Model,
-          through: {
-            model: OrderDetail,
-            attributes: ['quantity', 'subtotal']
-          }
-        }
-      ]
-    });
+  
+    const findOrders= await OrderConfirmed.findAll({
+    where: {status: 'Impresión Finalizada'}});
 
-    return findOrders;
+    const ordersDetail = await Promise.all(
+      findOrders.map(async (o) => {
+        const dataDetail = await Promise.all(
+          o.dataDetail.map(async (detail) => {
+            const modelId = detail.modelId;
+            const modelData = await Model.findOne({ where: { id: modelId } });
+            const modelDataValues = modelData.dataValues;
+            return { ...detail, ...modelDataValues };
+          })
+        );
+        return {
+          orderId: o.dataValues.id,
+          userId: o.dataValues.userId,
+          totalBudget: o.dataValues.totalBudget,
+          status: o.dataValues.status,
+          fechaSolicitud: o.dataValues.createdAt,
+          detailModels: dataDetail
+        };
+      })
+    );
+
+    return ordersDetail;
+  
 }
 
 
 
-module.exports= {newOrder, deleteInOrder, changeOrderStatus, getOrderDetail, changeStatusOD, ordersForBilling}
+module.exports= {newOrder, deleteInOrder, changeOrderStatus, getOrderDetail, changeStatusOD, ordersForBilling, ordersByUser, 
+  confirmedOrder, deleteOrderCtrl}
