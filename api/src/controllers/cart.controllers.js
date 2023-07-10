@@ -39,4 +39,13 @@ const getCartByUser= async(token)=> {
 
 }
 
-module.exports= { getCartByUser }
+const eliminateCart= async(token)=> {
+    const decoded= jwt.verify(token, process.env.JWT_SECRET);
+    const findUser= await User.findByPk(decoded?.id); 
+    const cart = await Cart.findOne({ where: { userId: findUser.id } });
+    await cart.destroy();
+    return;
+}
+
+
+module.exports= { getCartByUser, eliminateCart }

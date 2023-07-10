@@ -31,7 +31,7 @@ let entries = Object.entries(sequelize.models);
 let capsEntries = entries.map((entry) => [entry[0][0].toUpperCase() + entry[0].slice(1), entry[1]]);
 sequelize.models = Object.fromEntries(capsEntries);
 
-const { User, Cart, Order, Model, OrderDetail }= sequelize.models;
+const { User, Cart, Order, Model, OrderDetail, OrderConfirmed }= sequelize.models;
 
 User.prototype.passwordMatched= async(password, passwordEntered)=>{
   const result= await bcrypt.compare(passwordEntered, password);
@@ -47,6 +47,10 @@ User.hasMany(Order, { foreignKey: 'userId' });
 Cart.hasMany(Order, { foreignKey: 'cartId' }); 
 Model.belongsToMany(Order, { through:  OrderDetail });
 Order.belongsToMany(Model, { through: OrderDetail });
+User.hasMany(OrderConfirmed, { foreignKey: 'userId' });
+
+// Model.belongsToMany(OrderConfirmed, { through: DetailOrderConfirmed });
+// OrderConfirmed.belongsToMany(Model, { through: DetailOrderConfirmed });
 
 module.exports = {
   ...sequelize.models, // para poder importar los modelos así: const { Product, User } = require('./db.js');
