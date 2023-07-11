@@ -141,6 +141,7 @@ const getOrdersByUser= async(req, res)=> {
 
 const changeStatusOrderDetail= async (req, res)=> {
     let { status, orderId, modelId }= req.body;
+    console.log(status, orderId, modelId);
     try{
         const changeStatus= await changeStatusOD(status, orderId, modelId);
         res.status(200).json(changeStatus)
