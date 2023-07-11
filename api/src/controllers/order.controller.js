@@ -104,14 +104,18 @@ const changeStatusOD= async(status, orderId, modelId)=> {
   let detail= findOrder.dataDetail;
   let restOfModels= detail.filter(d=> d.modelId !== modelId);  
   let filterByModel= detail.filter(d=> d.modelId === modelId);
-  filterByModel[0].status === status;
-
+  filterByModel[0].status = status;
+  console.log ('rest', restOfModels);
+  console.log(filterByModel);
   const resultDetail= restOfModels.concat(filterByModel);
-
+  console.log(resultDetail);
   const anyStatusPending= resultDetail.filter(m=> m.status !== 'Impresión Finalizada');
 
-  if(!anyStatusPending){
-      await findOrder.update({status: 'Impresión Finalizada'})
+  if(anyStatusPending.length<1){
+    let updateOrder= await OrderConfirmed.findOne({where: {id: orderId}});
+      await updateOrder.update({status: 'Impresión Finalizada', dataDetail: resultDetail});
+      let dateUpdate= findOrder.updatedAt;
+      return [updateOrder, {finishDatePrint: dateUpdate}]
   } 
 
   await findOrder.update({dataDetail: resultDetail});
@@ -177,8 +181,28 @@ const ordersByUser= async(token)=> {
   const findUser= await User.findByPk(decoded?.id); 
   const order= await OrderConfirmed.findAll({where: {userId : findUser.id}});
   const openOrders= order.filter(o=> o.status !== 'Cerrada');
-  
-  return openOrders;
+  const ordersDetail= await Promise.all(
+    openOrders.map(async(o)=> {
+      const dataDetail = await Promise.all(
+        o.dataDetail.map(async (detail) => {
+          const modelId = detail.modelId;
+          const modelData = await Model.findOne({ where: { id: modelId } });
+          const modelDataValues = modelData.dataValues;
+          return { ...detail, ...modelDataValues };
+        })
+      );
+      return {
+        orderId: o.dataValues.id,
+        userId: o.dataValues.userId,
+        totalBudget: o.dataValues.totalBudget,
+        status: o.dataValues.status,
+        fechaSolicitud: o.dataValues.createdAt,
+        detailModels: dataDetail
+      };
+    })
+  )
+
+  return ordersDetail;
 }
 
 const ordersForBilling= async()=> {
