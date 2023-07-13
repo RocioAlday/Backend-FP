@@ -1,7 +1,8 @@
 const { createModel, getAllModels, getModelsByCompany, getModelsByName,  modifyModelCtrl } = require('../controllers/model.controllers');
 const models = require('../utils/modelsPrueba');
 const { Model }= require('../db');
-
+const axios= require('axios');
+const cheerio = require('cheerio');
 
 const createModelsDB= async (req, res)=> {
     try {
@@ -89,8 +90,23 @@ const modelsByName= async (req, res)=> {
 }
 
 
+const getDolar= async(req, res)=> {
+    try {
+        const response = await axios.get('https://www.bna.com.ar/Personas');
+        const html = response.data;
+        const $ = cheerio.load(html);
+        let valor = $('table.table.cotizacion tr:nth-child(1) td:nth-child(3)').text().replace(/,/g, '.');;
+        valor= parseFloat(valor.slice(0,7));
+
+        res.status(200).json({valor});
+
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({error: 'Error geting dolar value', message: error.message});
+      }
+}
 
 
 
 
-module.exports= { newSTLModel, allModels, companyModels, createModelsDB, modelsByName, modifyModel };
+module.exports= { newSTLModel, allModels, companyModels, createModelsDB, modelsByName, modifyModel, getDolar };

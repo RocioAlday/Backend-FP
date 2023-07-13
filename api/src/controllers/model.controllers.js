@@ -1,5 +1,8 @@
 const { Model, User }= require('../db');
 const jwt= require('jsonwebtoken');
+require('dotenv').config();
+const { BCRA_TOKEN } = process.env;
+const axios= require('axios');
 
 const createModel= async(name, material, link, price, companyName, image)=> {
     const model= Model.create({
@@ -55,5 +58,20 @@ const modifyModelCtrl= async(id, name, material, link, price, companyName, image
     return findModel;
 }
 
+const usdToArs= async(token)=> {
+    console.log(token);
+    const result= await axios.get("https://api.estadisticasbcra.com/usd_of" ,
+    {
+        headers: {
+            Authorization: `BEARER ${BCRA_TOKEN}`
+          }
+    });
+    let lastIndex= result.data.length;
+    console.log(result.data);
+    return (result.data[lastIndex-1]);
 
-module.exports= { createModel, getAllModels, getModelsByCompany, getModelsByCompany, getModelsByName, modifyModelCtrl };
+    
+};
+
+
+module.exports= { createModel, getAllModels, getModelsByCompany, getModelsByCompany, getModelsByName, modifyModelCtrl, usdToArs };
