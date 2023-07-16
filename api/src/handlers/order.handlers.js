@@ -1,116 +1,90 @@
-const { newOrder, deleteInOrder, changeOrderStatus, getOrderDetail, changeStatusOD, ordersForBilling, ordersByUser, confirmedOrder, deleteOrderCtrl } = require("../controllers/order.controller");
+const { newOrder, deleteInOrder, changeOrderStatus, getOrderDetail, changeStatusOD, ordersForBilling, ordersByUser, confirmedOrder, deleteOrderCtrl,
+    changeStatusOrderConfirmed } = require("../controllers/order.controller");
 
 const createOrder= async(req, res)=> {
-    let token= req.headers.authorization;
-    console.log(token);
-    if(req?.headers?.authorization?.startsWith('Bearer')){
-        token= req.headers.authorization.split(" ")[1] 
-        console.log(token);
-        try{
-            const order= await newOrder(token);
-            res.status(200).json(order);
+    const { id }= req.user;
+    try{
+        const order= await newOrder(id);
+        res.status(200).json(order);
 
-        } catch(error){
-        res.status(500).json({error: 'Error creating order', message: error.message})
-        }
-    } else {
-        res.status(500).send('There is no token attached to header');
+    } catch(error){
+        res.status(400).json({error: 'Error creating order', message: error.message})
     }
+   
 };
 
 
-
 const modifyOrder= async(req, res)=>{
-    let token= req.headers.authorization;
-    console.log(token);
-    if(req?.headers?.authorization?.startsWith('Bearer')){
-        token= req.headers.authorization.split(" ")[1] 
-        
-        try{
-            const order= await newOrder(token)
-            res.status(200).json(order);
+    const { id }= req.user;  
+    try{
+        const order= await newOrder(id)
+        res.status(200).json(order);
 
-        } catch(error){
-        res.status(500).json({error: 'Error geting order', message: error.message})
-        }
-    } else {
-        res.status(500).send('There is no token attached to header');
+    } catch(error){
+        res.status(400).json({error: 'Error geting order', message: error.message})
     }
-
 }
 
 
 const deleteItemOrder= async(req, res)=> {
-    let token= req.headers.authorization;
+    const { id }= req.user;  
+    try{
+        const newOrder= await deleteInOrder(id);
+        res.status(200).json(newOrder);
 
-    if(req?.headers?.authorization?.startsWith('Bearer')){
-        token= req.headers.authorization.split(" ")[1] 
-        
-        try{
-            const newOrder= await deleteInOrder(token);
-            res.status(200).json(newOrder);
-
-        } catch(error){
-        res.status(500).json({error: 'Error geting order', message: error.message})
-        }
-    } else {
-        res.status(500).send('There is no token attached to header');
+    } catch(error){
+        res.status(400).json({error: 'Error geting order', message: error.message})
     }
-
 }
 
 const changeStatus= async(req, res)=> {
-    let token= req.headers.authorization;
     let {status}= req.body;
-    if(req?.headers?.authorization?.startsWith('Bearer')){
-        token= req.headers.authorization.split(" ")[1] 
-        
-        try{
-            const orderStatus= await changeOrderStatus(token, status);
-            res.status(200).json(orderStatus);
+    const { id }= req.user;
 
-        } catch(error){
-        res.status(500).json({error: 'Error changing order status', message: error.message})
-        }
-    } else {
-        res.status(500).send('There is no token attached to header');
+    try{
+        const orderStatus= await changeOrderStatus(id, status);
+        res.status(200).json(orderStatus);
+
+    } catch(error){
+        res.status(400).json({error: 'Error changing order status', message: error.message})
     }
 }
 
+const changeConfirmedStatusOrder= async(req, res)=> {
+    const { orders }= req.body; //array q tiene objs : [{status: 'Fact', id: orderId}, {status: 'Cobr', id: orderId}]
+    
+    try {
+        const orderChanged= await changeStatusOrderConfirmed(orders);
+        res.status(200).json(orderChanged);
+
+    } catch(error){
+        res.status(400).json({error: 'Error changing confirmed order status', message: error.message})
+    }
+
+}
+
 const addToOrderConfirmed= async(req, res)=> {
-    let token= req.headers.authorization;
-    let {orderId, status}= req.body;
+    const { id }= req.user;
+    let {orderId, status, dolarValue}= req.body;
 
-    if(req?.headers?.authorization?.startsWith('Bearer')){
-        token= req.headers.authorization.split(" ")[1] 
-
-        try{
-            const order= await confirmedOrder(token, orderId, status);
-            res.status(200).json(order);
-        } catch(error){
-        res.status(500).json({error: 'Error adding order to Orders Confirmed', message: error.message})
-        }
-    } else {
-        res.status(500).send('There is no token attached to header');
+    try{
+        const order= await confirmedOrder(id, orderId, status, dolarValue);
+        res.status(200).json(order);
+    } catch(error){
+        res.status(400).json({error: 'Error adding order to Orders Confirmed', message: error.message})
     }
 }
 
 const deleteOrder= async(req, res)=> {
-    let token= req.headers.authorization;
+    const { id }= req.user;
     let {orderId}= req.body;
+   
+    try{
+        await deleteOrderCtrl(id, orderId);
+        res.status(200).json({message: 'Order successfully elimated'});
 
-    if(req?.headers?.authorization?.startsWith('Bearer')){
-        token= req.headers.authorization.split(" ")[1] 
-        
-        try{
-            await deleteOrderCtrl(token, orderId);
-            res.status(200).json({message: 'Order successfully elimated'});
-
-        } catch(error){
+    } catch(error){
         res.status(500).json({error: 'Error deleting order', message: error.message})
-        }
-    } else {
-        res.status(500).send('There is no token attached to header');
     }
 }
 
@@ -124,18 +98,12 @@ const getOrders= async(req, res)=> {
 }
 
 const getOrdersByUser= async(req, res)=> {
-    let token= req.headers.authorization;
-
-    if(req?.headers?.authorization?.startsWith('Bearer')){
-        token= req.headers.authorization.split(" ")[1]; 
-        try{
-            const orders= await ordersByUser(token);
-            res.status(200).json(orders);
-        } catch(error) {
+    const { id }= req.user;
+    try{
+        const orders= await ordersByUser(id);
+        res.status(200).json(orders);
+    } catch(error) {
         res.status(500).json({error: 'Error geting Orders By User', message: error.message})
-        }
-    } else {
-        res.status(500).send('There is no token attached to header');
     }
 }
 
@@ -160,4 +128,4 @@ const getOrdersForBilling= async(req, res)=> {
 }
 
 module.exports= {createOrder, modifyOrder, deleteItemOrder, changeStatus, getOrders, changeStatusOrderDetail, getOrdersForBilling, 
-    getOrdersByUser, addToOrderConfirmed, deleteOrder }
+    getOrdersByUser, addToOrderConfirmed, deleteOrder, changeConfirmedStatusOrder }

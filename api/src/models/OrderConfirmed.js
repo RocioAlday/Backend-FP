@@ -25,6 +25,11 @@ module.exports= (sequelize)=> {
         dataDetail: {
             type: DataTypes.ARRAY(DataTypes.JSON), 
             defaultValue: []
-      }
+        },
+        dolarValue: {
+            type: DataTypes.DECIMAL,
+            allowNull: false,
+            field: "DolarValue",
+        }
     })
 }
