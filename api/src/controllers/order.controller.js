@@ -1,102 +1,91 @@
 const { User, Cart, Order, Model, OrderDetail, OrderConfirmed }= require('../db');
 const jwt= require('jsonwebtoken');
 
-const newOrder= async(token) => {
-    if (token){
-        const decoded= jwt.verify(token, process.env.JWT_SECRET);
-        const findUser= await User.findByPk(decoded?.id); 
-        const cartUser= await Cart.findOne({where: {userId: findUser.id}});
-        let order= await Order.findOne({where: {cartId: cartUser.id}})
+const newOrder= async(id) => {
+  const findUser= await User.findByPk(id); 
+  const cartUser= await Cart.findOne({where: {userId: findUser.id}});
+  let order= await Order.findOne({where: {cartId: cartUser.id}})
 
-        if (!cartUser) {
-            throw new Error('Cart not found');
-        } else if (!cartUser.items.length && order) {
-            await order.destroy();
-        } else if (!cartUser.items.length) { 
-            throw new Error('No Products on Cart') 
-        };
+    if (!cartUser) {
+      throw new Error('Cart not found');
+    } else if (!cartUser.items.length && order) {
+      await order.destroy();
+    } else if (!cartUser.items.length) { 
+      throw new Error('No Products on Cart') 
+    };
 
-        if(!order && cartUser){
-            order = await Order.create({
-                userId: findUser.id,
-                cartId: cartUser.id,
-            });
-        }
-      if(order && cartUser) {
-        let cartModels= [];
-        for (const item of cartUser.items) {        
-            const model= await Model.findByPk(item.id);
-            cartModels.push(model);
-            const subtotal= item.quantity * model.price;
-            await order.addModel(model, {
-                through: {quantity: item.quantity, subtotal: subtotal, color: item.color}
-            })
-        }
-        console.log(cartModels);
-
-        let totalPrice= 0;
-        const allModelsOrder= await order.getModels(); 
-        for (const model of allModelsOrder) {
-            totalPrice += model.price * model.OrderDetail.quantity;
-        }
-        await order.update({totalBudget: totalPrice});
-
-        const orderDetails = await Order.findOne({ 
-            where: {id: order.id},
-            include: [
-              {
-                model: Model,
-                through: {
-                  model: OrderDetail,
-                  attributes: ['quantity', 'subtotal', 'color']
-                }
-              }
-            ]
-          });
-
-        return orderDetails;
-      }
-    } else {
-        throw new Error('No RefreshToken in cookies');
+    if(!order && cartUser){
+      order = await Order.create({
+        userId: findUser.id,
+        cartId: cartUser.id,
+      });
     }
 
+    if(order && cartUser) {
+      let cartModels= [];
+      for (const item of cartUser.items) {        
+          const model= await Model.findByPk(item.id);
+          cartModels.push(model);
+          const subtotal= item.quantity * model.price;
+          await order.addModel(model, {
+            through: {quantity: item.quantity, subtotal: subtotal, color: item.color}
+          })
+      }
+      // console.log(cartModels);
+
+      let totalPrice= 0;
+      const allModelsOrder= await order.getModels(); 
+      for (const model of allModelsOrder) {
+        totalPrice += model.price * model.OrderDetail.quantity;
+      }
+      await order.update({totalBudget: totalPrice});
+
+      const orderDetails = await Order.findOne({ 
+        where: {id: order.id},
+        include: [
+          {
+            model: Model,
+            through: {
+              model: OrderDetail,
+              attributes: ['quantity', 'subtotal', 'color']
+            }
+          }
+        ]
+      });
+
+      return orderDetails;
+    }
 };
 
 
-const deleteInOrder= async(token)=> {
-    if (token){
-        const decoded= jwt.verify(token, process.env.JWT_SECRET);
-        const findUser= await User.findByPk(decoded?.id); 
-        const cartUser= await Cart.findOne({where: {userId: findUser.id}});
-        let order= await Order.findOne({where: {cartId: cartUser.id}});
-        await order.destroy();
-        const modifyOrder= await newOrder(token);
+const deleteInOrder= async(id)=> {
+    
+  const findUser= await User.findByPk(id); 
+  const cartUser= await Cart.findOne({where: {userId: findUser.id}});
+  let order= await Order.findOne({where: {cartId: cartUser.id}});
+  await order.destroy();
+  const modifyOrder= await newOrder(token);
         
-        return modifyOrder;
-    }
+  return modifyOrder;
 }
 
-const deleteOrderCtrl= async(token, orderId)=> {
-  if (token){
-    const decoded= jwt.verify(token, process.env.JWT_SECRET);
-    const findUser= await User.findByPk(decoded?.id); 
-    const cartUser= await Cart.findOne({where: {userId: findUser.id}});
-    let order= await Order.findOne({where: {id: orderId}});
-    await order.destroy();
-    await cartUser.update({items: []});
-    return;
-  }
+const deleteOrderCtrl= async(id, orderId)=> {
+  
+  const findUser= await User.findByPk(id); 
+  const cartUser= await Cart.findOne({where: {userId: findUser.id}});
+  let order= await Order.findOne({where: {id: orderId}});
+  await order.destroy();
+  await cartUser.update({items: []});
+  return;
 }
 
-const changeOrderStatus= async(token, status)=> {
-    if (token){
-        const decoded= jwt.verify(token, process.env.JWT_SECRET);
-        const findUser= await User.findByPk(decoded?.id); 
-        const cartUser= await Cart.findOne({where: {userId: findUser.id}});
-        let order= await Order.findOne({where: {cartId: cartUser.id}});
-        await order.update({status: status});
-        return await Order.findOne({where: {id: order.id}});
-    }
+const changeOrderStatus= async(id, status)=> {
+    
+  const findUser= await User.findByPk(id); 
+  const cartUser= await Cart.findOne({where: {userId: findUser.id}});
+  let order= await Order.findOne({where: {cartId: cartUser.id}});
+  await order.update({status: status});
+  return await Order.findOne({where: {id: order.id}});
 }
 
 const changeStatusOD= async(status, orderId, modelId)=> {
@@ -149,36 +138,45 @@ const getOrderDetail = async () => {
 };
 
 
-const confirmedOrder= async(token, orderId, status)=> {
-  const decoded= jwt.verify(token, process.env.JWT_SECRET);
-  const findUser= await User.findByPk(decoded?.id); 
+const confirmedOrder= async(id, orderId, status, dolarValue)=> {
+ 
+  const findUser= await User.findByPk(id); 
   const order= await Order.findByPk(orderId);
   const orderDetail= await OrderDetail.findAll({where: {orderId: order.id}});
   const details= orderDetail.map((d)=> {
     return ({
     modelId: d.modelId,
     quantity: d.quantity,
-    subtotal: d.subtotal,
+    subtotal: d.subtotal*dolarValue,
     color: d.color,
-    status: d.status 
+    status: d.status,
    })
   })
  
   if(order && orderDetail){
     var orderConfirmed = await OrderConfirmed.create({
         userId: findUser.id,
-        totalBudget: order.totalBudget,
+        totalBudget: order.totalBudget*dolarValue,
         status: status,
-        dataDetail: details
+        dataDetail: details,
+        dolarValue: dolarValue 
     });
   }
 
   return orderConfirmed;
 }
 
-const ordersByUser= async(token)=> {
-  const decoded= jwt.verify(token, process.env.JWT_SECRET);
-  const findUser= await User.findByPk(decoded?.id); 
+const changeStatusOrderConfirmed= async(orders)=> {
+  for (let order of orders) {
+    let findOrder= await OrderConfirmed.findByPk(order.id);
+    await findOrder.update({status: order.status})
+  }
+ 
+  return ('Order Status Changed Successfully')
+}
+
+const ordersByUser= async(id)=> {
+  const findUser= await User.findByPk(id); 
   const order= await OrderConfirmed.findAll({where: {userId : findUser.id}});
   const openOrders= order.filter(o=> o.status !== 'Cerrada');
   const ordersDetail= await Promise.all(
@@ -226,7 +224,8 @@ const ordersForBilling= async()=> {
           totalBudget: o.dataValues.totalBudget,
           status: o.dataValues.status,
           fechaSolicitud: o.dataValues.createdAt,
-          detailModels: dataDetail
+          detailModels: dataDetail,
+          dolarValue: o.dataValues.dolarValue
         };
       })
     );
@@ -238,4 +237,4 @@ const ordersForBilling= async()=> {
 
 
 module.exports= {newOrder, deleteInOrder, changeOrderStatus, getOrderDetail, changeStatusOD, ordersForBilling, ordersByUser, 
-  confirmedOrder, deleteOrderCtrl}
+  confirmedOrder, deleteOrderCtrl, changeStatusOrderConfirmed}

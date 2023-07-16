@@ -1,4 +1,4 @@
-const { userCreation, userLogin, logOutUserCtr, getUsers }= require('../controllers/user.controllers');
+const { userCreation, userLogin, logOutUserCtr, getUsers, getUserInfo }= require('../controllers/user.controllers');
 
 const newUser= async (req, res)=> {
     const { companyName, companyCUIT, taxCondition, firstname, lastname, email, phone, image, password, status }= req.body;
@@ -63,5 +63,16 @@ const allUsers= async (req, res)=> {
     }
 }
 
+const getUserInfoForBilling= async(req, res)=> {
+    let { userId }= req.query;
+    console.log(userId);
+    try {
+        const data= await getUserInfo(Number(userId));
+        res.status(200).json(data);
 
-module.exports= { newUser, loginUser, logoutUser, allUsers }
+    } catch(error) {
+        res.status(500).json({error: 'Error geting cuit & data for billing', message: error.message});
+    }
+}
+
+module.exports= { newUser, loginUser, logoutUser, allUsers, getUserInfoForBilling }

@@ -1,6 +1,7 @@
 const { User }= require('../db');
 const { hashPassword }= require('../config/hashPassword');
 const { generateRefreshToken }= require('../config/generateRefreshToken');
+const { authMiddleware }= require('../middlewares/authToken');
 
 const userCreation= async(companyName, companyCUIT, taxCondition, firstname, lastname, email, phone, image, password, status)=> {
     const user= await User.findOne({ where : { email: email } });
@@ -57,4 +58,14 @@ const getUsers= async()=> {
     return users;
 }
 
-module.exports= { userCreation, userLogin, logOutUserCtr, getUsers };
+const getUserInfo= async(userId)=> {
+    const user= await User.findByPk(userId);
+    const dataUser= {
+        name: user.companyName,
+        cuit: user.companyCUIT,
+        condicionImpositiva: user.taxCondition
+    };
+    return dataUser;
+}
+
+module.exports= { userCreation, userLogin, logOutUserCtr, getUsers, getUserInfo };

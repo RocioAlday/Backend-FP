@@ -51,42 +51,27 @@ const modifyModel= async(req, res)=> {
 }
 
 const companyModels= async (req, res)=> {
-    
-    //const {companyName}= req.body; //no hara falta xq lo saco con el token, llego a los datos del user logueado
-    if(req?.headers?.authorization?.startsWith('Bearer')){
-        let token= req.headers.authorization.split(" ")[1];
+    const { id }= req.user;
+    try{
+        const modelsByCompany= await getModelsByCompany(id);
+        res.status(200).json(modelsByCompany);
 
-        try{
-            const modelsByCompany= await getModelsByCompany(token);
-            res.status(200).json(modelsByCompany);
-
-        } catch(error) {
+    } catch(error) {
         res.status(500).json({ error: 'Error Getting Models By Company', message: error.message });
-        }
-    } else {
-        res.status(500).send('There is no token attached to header');
     }
 };
 
 const modelsByName= async (req, res)=> {
-    
-    if(req?.headers?.authorization?.startsWith('Bearer')){
-        let token= req.headers.authorization.split(" ")[1];
+    const { id }= req.user;
+    const { name } = req.query;
 
-        const { name } = req.query;
-
-        try{
-            const models= await getModelsByName(token, name);
-            res.status(200).json(models);
+    try {
+        const models= await getModelsByName(id, name);
+        res.status(200).json(models);
 
         } catch (error){
             res.status(500).json({ error: 'Error Getting Models By Name', message: error.message });
         }
-    
-    
-    } else {
-        res.status(500).send('There is no token attached to header');
-    }
 }
 
 
