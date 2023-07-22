@@ -52,6 +52,16 @@ const logoutUser= async (req, res)=> {
     }   
 };
 
+const getUserData= async(req, res)=> {
+    const { id }= req.user;
+    try {
+        const data= await getUserInfo(id);
+        res.status(200).json(data);
+    } catch(error) {
+        res.status(500).json({ message: 'Can not get userData info', error: error.message});
+    }
+}
+
 const allUsers= async (req, res)=> {
     
     try {
@@ -64,10 +74,9 @@ const allUsers= async (req, res)=> {
 }
 
 const getUserInfoForBilling= async(req, res)=> {
-    let { userId }= req.query;
-    console.log(userId);
+    const { id }= req.user;
     try {
-        const data= await getUserInfo(Number(userId));
+        const data= await getUserInfo(id);
         res.status(200).json(data);
 
     } catch(error) {
@@ -75,4 +84,4 @@ const getUserInfoForBilling= async(req, res)=> {
     }
 }
 
-module.exports= { newUser, loginUser, logoutUser, allUsers, getUserInfoForBilling }
+module.exports= { newUser, loginUser, logoutUser, allUsers, getUserData, getUserInfoForBilling }

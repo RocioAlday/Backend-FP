@@ -58,14 +58,18 @@ const getUsers= async()=> {
     return users;
 }
 
-const getUserInfo= async(userId)=> {
-    const user= await User.findByPk(userId);
+const getUserInfo= async(id)=> {
+    const user= await User.findByPk(id);
     const dataUser= {
+        firstname: user.firstname,
+        email: user.email,
         name: user.companyName,
         cuit: user.companyCUIT,
-        condicionImpositiva: user.taxCondition
+        condicionImpositiva: user.taxCondition,
+        role: user.role
     };
     return dataUser;
 }
+
 
 module.exports= { userCreation, userLogin, logOutUserCtr, getUsers, getUserInfo };
