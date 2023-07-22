@@ -33,6 +33,10 @@ module.exports= (sequelize)=> {
         image: {
             type: DataTypes.TEXT,
             field: 'image'
+        },
+        parameters: {
+            type: DataTypes.TEXT,
+            fiel: 'parameters'
         }
     })
 }
