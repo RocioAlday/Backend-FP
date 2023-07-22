@@ -27,9 +27,29 @@ module.exports= (sequelize)=> {
             defaultValue: []
         },
         dolarValue: {
-            type: DataTypes.DECIMAL,
+            type: DataTypes.DECIMAL(6,2),
             allowNull: false,
             field: "DolarValue",
+        },
+        finishPrintDate: {
+            type: DataTypes.STRING,
+            field: "DateFinishPrint"
+        },
+        billedDate: {
+            type: DataTypes.STRING,
+            field: "BilledDate"
+        },
+        collectDate: {
+            type: DataTypes.STRING,
+            field: "CollectDate"
+        },
+        deliveredDate: {
+            type: DataTypes.STRING,
+            field: "DeliveredDate"
+        },
+        priority: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: false
         }
     })
 }
