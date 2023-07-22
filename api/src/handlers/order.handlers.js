@@ -1,5 +1,5 @@
 const { newOrder, deleteInOrder, changeOrderStatus, getOrderDetail, changeStatusOD, ordersForBilling, ordersByUser, confirmedOrder, deleteOrderCtrl,
-    changeStatusOrderConfirmed } = require("../controllers/order.controller");
+    changeStatusOrderConfirmed, modifyOrderDashAdmin, changePriority } = require("../controllers/order.controller");
 
 const createOrder= async(req, res)=> {
     const { id }= req.user;
@@ -51,8 +51,8 @@ const changeStatus= async(req, res)=> {
 }
 
 const changeConfirmedStatusOrder= async(req, res)=> {
-    const { orders }= req.body; //array q tiene objs : [{status: 'Fact', id: orderId}, {status: 'Cobr', id: orderId}]
-    
+    const orders= req.body; 
+    // console.log(orders);
     try {
         const orderChanged= await changeStatusOrderConfirmed(orders);
         res.status(200).json(orderChanged);
@@ -127,5 +127,26 @@ const getOrdersForBilling= async(req, res)=> {
     }
 }
 
+const modifyOrderByAdmin= async(req, res)=> {
+    const { orderId, modelId, status, quantity, material, color }= req.body;
+
+    try {
+        const modified= await modifyOrderDashAdmin(orderId, modelId, status, quantity, material, color);
+        res.status(200).json(modified)
+    } catch(error) {
+        res.status(500).json({error: 'Error modifing order on dashboard admin', message: error.message})
+    }
+}
+
+const modifyPriority= async(req, res)=> {
+    const { orderId, priority }= req.body;
+    try {
+        const modify= await changePriority(orderId, priority);
+        res.status(200).json(modify)
+    } catch(error) {
+        res.status(500).json({error: 'Error modifyng priority in order', message: error.message})
+    }
+}
+
 module.exports= {createOrder, modifyOrder, deleteItemOrder, changeStatus, getOrders, changeStatusOrderDetail, getOrdersForBilling, 
-    getOrdersByUser, addToOrderConfirmed, deleteOrder, changeConfirmedStatusOrder }
+    getOrdersByUser, addToOrderConfirmed, deleteOrder, changeConfirmedStatusOrder, modifyOrderByAdmin, modifyPriority }

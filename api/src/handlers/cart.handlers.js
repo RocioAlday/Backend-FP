@@ -1,16 +1,13 @@
-const {Cart, Model} = require('../db');
+const {Cart} = require('../db');
 const { getCartByUser, eliminateCart }= require('../controllers/cart.controllers');
 
 
 const getCart = async (req, res) => {
 
-  if(req?.headers?.authorization?.startsWith('Bearer')){
-    var token= req.headers.authorization.split(" ")[1];
-  }
-  console.log(token);
+  const { id }= req.user;
   try {
     
-    const cartUser= await getCartByUser(token);
+    const cartUser= await getCartByUser(id);
     console.log(cartUser);
     res.status(200).json(cartUser);
 
@@ -21,16 +18,14 @@ const getCart = async (req, res) => {
 
 
 const modifyCart = async (req, res) => {
-  
-  if(req?.headers?.authorization?.startsWith('Bearer')){
-    var token= req.headers.authorization.split(" ")[1];
-  }
+  const { id }= req.user;
+ 
   //  var token = req.cookies.refreshToken; 
   //  console.log(token);
    const product = req.body.product;
   // console.log(product);
     try {
-      var cart= await getCartByUser(token);
+      var cart= await getCartByUser(id);
       // console.log('HANDLER CART', cart);
       var findCartDB= await Cart.findOne({where: {userId: cart.userId}});
 
@@ -65,11 +60,9 @@ const modifyCart = async (req, res) => {
   };
 
 const deleteCart= async(req, res)=> {
-  if(req?.headers?.authorization?.startsWith('Bearer')){
-    var token= req.headers.authorization.split(" ")[1];
-  }
+  const { id }= req.user;
   try{
-    await eliminateCart(token);
+    await eliminateCart(id);
     res.status(200).json({message: 'Cart Empty'})
   } catch (error) {
     res.status(500).json({ error: 'Error deleting Cart', message: error.message })

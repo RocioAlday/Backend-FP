@@ -1,5 +1,4 @@
 const { User, Cart, Order, Model, OrderDetail, OrderConfirmed }= require('../db');
-const jwt= require('jsonwebtoken');
 
 const newOrder= async(id) => {
   const findUser= await User.findByPk(id); 
@@ -64,7 +63,7 @@ const deleteInOrder= async(id)=> {
   const cartUser= await Cart.findOne({where: {userId: findUser.id}});
   let order= await Order.findOne({where: {cartId: cartUser.id}});
   await order.destroy();
-  const modifyOrder= await newOrder(token);
+  const modifyOrder= await newOrder(id);
         
   return modifyOrder;
 }
@@ -99,13 +98,16 @@ const changeStatusOD= async(status, orderId, modelId)=> {
   const resultDetail= restOfModels.concat(filterByModel);
   console.log(resultDetail);
   const anyStatusPending= resultDetail.filter(m=> m.status !== 'Impresión Finalizada');
-
-  if(anyStatusPending.length<1){
-    let updateOrder= await OrderConfirmed.findOne({where: {id: orderId}});
-      await updateOrder.update({status: 'Impresión Finalizada', dataDetail: resultDetail});
-      let dateUpdate= findOrder.updatedAt;
-      return [updateOrder, {finishDatePrint: dateUpdate}]
-  } 
+  const notDelivered= resultDetail.filter(m=> m.status !== 'Entregado');
+  
+  let date= new Date();
+  if(!anyStatusPending.length && status === 'Impresión Finalizada'){
+      await findOrder.update({status: 'Impresión Finalizada', dataDetail: resultDetail, finishPrintDate: date.toISOString() });
+      return findOrder
+  } else if (!notDelivered.length && status === 'Entregado') {
+    await findOrder.update({status: 'Entregado', dataDetail: resultDetail, deliveredDate: date.toISOString()});
+    return findOrder
+  }
 
   await findOrder.update({dataDetail: resultDetail});
   return resultDetail;
@@ -130,6 +132,7 @@ const getOrderDetail = async () => {
         totalBudget: o.dataValues.totalBudget,
         status: o.dataValues.status,
         fechaSolicitud: o.dataValues.createdAt,
+        priority: o.dataValues.priority,
         detailModels: dataDetail
       };
     })
@@ -167,9 +170,26 @@ const confirmedOrder= async(id, orderId, status, dolarValue)=> {
 }
 
 const changeStatusOrderConfirmed= async(orders)=> {
+  let date= new Date();
   for (let order of orders) {
-    let findOrder= await OrderConfirmed.findByPk(order.id);
-    await findOrder.update({status: order.status})
+    let findOrder= await OrderConfirmed.findByPk(order.orderId);
+    let modifyDetail= findOrder.dataDetail.map((d)=> {
+      let detail= {...d};
+      detail.status= order.status;
+      return detail;
+    })
+ 
+    await findOrder.update({status: order.status, dataDetail: modifyDetail })
+   
+    switch (order.status) {
+      case 'Entregado': 
+        await findOrder.update({deliveredDate: date.toISOString()})
+      case 'Facturado':
+        await findOrder.update({billedDate: date.toISOString()})
+      case 'Cobrado':
+        await findOrder.update({collectDate: date.toISOString()})
+    
+    } 
   }
  
   return ('Order Status Changed Successfully')
@@ -195,7 +215,11 @@ const ordersByUser= async(id)=> {
         totalBudget: o.dataValues.totalBudget,
         status: o.dataValues.status,
         fechaSolicitud: o.dataValues.createdAt,
-        detailModels: dataDetail
+        detailModels: dataDetail,
+        fechaImpresionFinalizada: o.dataValues.finishPrintDate,
+        fechaFacturado: o.dataValues.billedDate,
+        fechaCobrado: o.dataValues.collectDate,
+        fechaRetirado: o.dataValues.deliveredDate
       };
     })
   )
@@ -206,7 +230,7 @@ const ordersByUser= async(id)=> {
 const ordersForBilling= async()=> {
   
     const findOrders= await OrderConfirmed.findAll({
-    where: {status: 'Impresión Finalizada'}});
+    where: { billedDate: null}});
 
     const ordersDetail = await Promise.all(
       findOrders.map(async (o) => {
@@ -234,7 +258,48 @@ const ordersForBilling= async()=> {
   
 }
 
+const modifyOrderDashAdmin= async(orderId, modelId, status, quantity, material, color)=> {
+  const order= await OrderConfirmed.findByPk(orderId);
+  const orderDetail= order.dataDetail;
+  const findModel= await Model.findByPk(modelId);
+  await findModel.update({material: material});
+  const modelPrice= findModel.price;
+  
+  let restOfModels= orderDetail.filter(d=> d.modelId !== modelId);  
+  let filterByModel= orderDetail.find(d=> d.modelId === modelId);
+  filterByModel.status = status; 
+  filterByModel.quantity= Number(quantity);
+  filterByModel.subtotal= modelPrice * Number(quantity) * Number(order.dolarValue);
+  filterByModel.color= color;
+
+  const resultDetail= restOfModels.concat(filterByModel);
+
+  let totalPrice= 0;
+  for (const model of resultDetail) {
+    totalPrice += model.subtotal;
+  }
+
+  const anyPendingDeliver= resultDetail.filter(m=> m.status !== 'Entregado');
+  const anyPendingBill= resultDetail.filter(m=> m.status !== 'Facturado');
+  const anyPendignCollect= resultDetail.filter(m => m.status !== 'Cobrado');
+  let date= new Date();
+  if(!anyPendingDeliver.length || !anyPendingBill.length || !anyPendignCollect.length){
+    let changeDate= !anyPendingDeliver.length? 'deliveredDate' : (!anyPendingBill.length? 'billedDate' : 'collectDate');
+   
+    await order.update({ status: status, totalBudget: totalPrice, dataDetail: resultDetail, [changeDate]: date.toISOString()});
+    return order
+  }
+
+  await order.update({ status: status, totalBudget: totalPrice, dataDetail: resultDetail});
+  return order;
+}
+
+const changePriority= async(orderId, priority)=> {
+  const order= await OrderConfirmed.findByPk(orderId);
+  await order.update({priority: priority});
+  return order
+}
 
 
 module.exports= {newOrder, deleteInOrder, changeOrderStatus, getOrderDetail, changeStatusOD, ordersForBilling, ordersByUser, 
-  confirmedOrder, deleteOrderCtrl, changeStatusOrderConfirmed}
+  confirmedOrder, deleteOrderCtrl, changeStatusOrderConfirmed, modifyOrderDashAdmin, changePriority}

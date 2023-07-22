@@ -1,14 +1,10 @@
 const { Cart, User, Model }= require('../db');
-const jwt = require('jsonwebtoken');
 
-const getCartByUser= async(token)=> {
-    if (token){
-        const decoded= jwt.verify(token, process.env.JWT_SECRET);
-        console.log(decoded);
-        const findUser= await User.findByPk(decoded?.id); 
-        // const findUser= await User.findOne({where: {refreshToken: token}});
-        const cart = await Cart.findOne({ where: { userId: findUser.id } });
-        console.log('cartUser:' , cart);
+const getCartByUser= async(id)=> {
+   
+    const findUser= await User.findByPk(id); 
+    const cart = await Cart.findOne({ where: { userId: findUser.id } });
+    console.log('cartUser:' , cart);
        
         if(!cart) {
             let newCart= await Cart.create({ userId: findUser.id });
@@ -33,15 +29,11 @@ const getCartByUser= async(token)=> {
         return { userId: findUser.id, items: allModelsCart };
         }
         return cart;
-    } else {
-        throw new Error('No RefreshToken in cookies');
-    };
 
 }
 
-const eliminateCart= async(token)=> {
-    const decoded= jwt.verify(token, process.env.JWT_SECRET);
-    const findUser= await User.findByPk(decoded?.id); 
+const eliminateCart= async(id)=> {
+    const findUser= await User.findByPk(id); 
     const cart = await Cart.findOne({ where: { userId: findUser.id } });
     await cart.destroy();
     return;
