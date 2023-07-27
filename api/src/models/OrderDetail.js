@@ -39,7 +39,12 @@ module.exports = (sequelize) => {
         allowNull: false,
         defaultValue: "Confirmado",
         field: "status",
+    },
+    priority: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
     }
+    
   });
 
   return OrderDetail;

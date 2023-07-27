@@ -11,6 +11,6 @@ router.post("/login", loginUser);
 router.get("/logout", logoutUser);
 router.get("/allUsers", allUsers);
 router.get("/dataUserForBill", authMiddleware, getUserInfoForBilling)
-router.get("/userData", authMiddleware, getUserData)
+router.get("/userData", getUserData)
 
 module.exports= router;
