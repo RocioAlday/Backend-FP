@@ -93,24 +93,25 @@ const changeStatusOD= async(status, orderId, modelId)=> {
   let restOfModels= detail.filter(d=> d.modelId !== modelId);  
   let filterByModel= detail.filter(d=> d.modelId === modelId);
   filterByModel[0].status = status;
-  console.log ('rest', restOfModels);
-  console.log(filterByModel);
+  // console.log ('rest', restOfModels);
+  // console.log(filterByModel);
   const resultDetail= restOfModels.concat(filterByModel);
-  console.log(resultDetail);
   const anyStatusPending= resultDetail.filter(m=> m.status !== 'Impresión Finalizada');
   const notDelivered= resultDetail.filter(m=> m.status !== 'Entregado');
   
   let date= new Date();
   if(!anyStatusPending.length && status === 'Impresión Finalizada'){
-      await findOrder.update({status: 'Impresión Finalizada', dataDetail: resultDetail, finishPrintDate: date.toISOString() });
-      return findOrder
+    let order= await OrderConfirmed.findByPk(orderId);
+      await order.update({status: 'Impresión Finalizada', dataDetail: resultDetail, finishPrintDate: date.toISOString() });
+     return order
   } else if (!notDelivered.length && status === 'Entregado') {
-    await findOrder.update({status: 'Entregado', dataDetail: resultDetail, deliveredDate: date.toISOString()});
-    return findOrder
+    let order= await OrderConfirmed.findByPk(orderId);
+    await order.update({status: 'Entregado', dataDetail: resultDetail, deliveredDate: date.toISOString()});
+   return order
   }
-
-  await findOrder.update({dataDetail: resultDetail});
-  return resultDetail;
+  let order= await OrderConfirmed.findByPk(orderId);
+  await order.update({dataDetail: resultDetail});
+  return order;
 }
 
 
@@ -141,7 +142,7 @@ const getOrderDetail = async () => {
 };
 
 
-const confirmedOrder= async(id, orderId, status, dolarValue)=> {
+const confirmedOrder= async(id, orderId, status, dolarValue, observations)=> {
  
   const findUser= await User.findByPk(id); 
   const order= await Order.findByPk(orderId);
@@ -153,6 +154,7 @@ const confirmedOrder= async(id, orderId, status, dolarValue)=> {
     subtotal: d.subtotal*dolarValue,
     color: d.color,
     status: d.status,
+    priority: d.priority
    })
   })
  
@@ -162,7 +164,8 @@ const confirmedOrder= async(id, orderId, status, dolarValue)=> {
         totalBudget: order.totalBudget*dolarValue,
         status: status,
         dataDetail: details,
-        dolarValue: dolarValue 
+        dolarValue: dolarValue,
+        observations: observations 
     });
   }
 
@@ -219,7 +222,8 @@ const ordersByUser= async(id)=> {
         fechaImpresionFinalizada: o.dataValues.finishPrintDate,
         fechaFacturado: o.dataValues.billedDate,
         fechaCobrado: o.dataValues.collectDate,
-        fechaRetirado: o.dataValues.deliveredDate
+        fechaRetirado: o.dataValues.deliveredDate,
+        observations: o.dataValues.observations
       };
     })
   )
@@ -249,7 +253,8 @@ const ordersForBilling= async()=> {
           status: o.dataValues.status,
           fechaSolicitud: o.dataValues.createdAt,
           detailModels: dataDetail,
-          dolarValue: o.dataValues.dolarValue
+          dolarValue: o.dataValues.dolarValue,
+          observations: o.dataValues.observations
         };
       })
     );
@@ -294,10 +299,17 @@ const modifyOrderDashAdmin= async(orderId, modelId, status, quantity, material, 
   return order;
 }
 
-const changePriority= async(orderId, priority)=> {
+const changePriority= async(orderId,modelId, priority)=> {
   const order= await OrderConfirmed.findByPk(orderId);
-  await order.update({priority: priority});
-  return order
+  const details= order.dataDetail;
+  let restOfModels= details.filter(d=> d.modelId !== modelId);  
+  let filterByModel= details.find(d=> d.modelId === modelId);
+  filterByModel.priority= priority;
+
+  const resultDetail= restOfModels.concat(filterByModel);
+  let newOrder= await OrderConfirmed.findByPk(orderId);
+  await newOrder.update({dataDetail: resultDetail});
+  return newOrder
 }
 
 

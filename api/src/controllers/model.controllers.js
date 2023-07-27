@@ -1,5 +1,4 @@
 const { Model, User }= require('../db');
-const jwt= require('jsonwebtoken');
 
 
 const createModel= async(name, material, link, price, companyName, image)=> {

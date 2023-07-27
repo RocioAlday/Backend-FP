@@ -65,10 +65,10 @@ const changeConfirmedStatusOrder= async(req, res)=> {
 
 const addToOrderConfirmed= async(req, res)=> {
     const { id }= req.user;
-    let {orderId, status, dolarValue}= req.body;
+    let {orderId, status, dolarValue, observations}= req.body;
 
     try{
-        const order= await confirmedOrder(id, orderId, status, dolarValue);
+        const order= await confirmedOrder(id, orderId, status, dolarValue, observations);
         res.status(200).json(order);
     } catch(error){
         res.status(400).json({error: 'Error adding order to Orders Confirmed', message: error.message})
@@ -139,9 +139,9 @@ const modifyOrderByAdmin= async(req, res)=> {
 }
 
 const modifyPriority= async(req, res)=> {
-    const { orderId, priority }= req.body;
+    const { orderId, modelId, priority }= req.body;
     try {
-        const modify= await changePriority(orderId, priority);
+        const modify= await changePriority(orderId, modelId, priority);
         res.status(200).json(modify)
     } catch(error) {
         res.status(500).json({error: 'Error modifyng priority in order', message: error.message})

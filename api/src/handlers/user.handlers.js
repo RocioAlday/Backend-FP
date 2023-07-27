@@ -1,4 +1,5 @@
 const { userCreation, userLogin, logOutUserCtr, getUsers, getUserInfo }= require('../controllers/user.controllers');
+const jwt= require('jsonwebtoken');
 
 const newUser= async (req, res)=> {
     const { companyName, companyCUIT, taxCondition, firstname, lastname, email, phone, image, password, status }= req.body;
@@ -53,13 +54,18 @@ const logoutUser= async (req, res)=> {
 };
 
 const getUserData= async(req, res)=> {
-    const { id }= req.user;
+    let token= req.headers.authorization.split(" ")[1];
+   
+    const decoded= jwt.verify(token, process.env.JWT_SECRET);
+    let userId= decoded.id;
+        
     try {
-        const data= await getUserInfo(id);
-        res.status(200).json(data);
+        const data= await getUserInfo(userId);
+        res.status(201).send(data);
     } catch(error) {
         res.status(500).json({ message: 'Can not get userData info', error: error.message});
     }
+ 
 }
 
 const allUsers= async (req, res)=> {
@@ -75,8 +81,9 @@ const allUsers= async (req, res)=> {
 
 const getUserInfoForBilling= async(req, res)=> {
     const { id }= req.user;
+    const { userId }= req.query;
     try {
-        const data= await getUserInfo(id);
+        const data= await getUserInfo(id, userId);
         res.status(200).json(data);
 
     } catch(error) {

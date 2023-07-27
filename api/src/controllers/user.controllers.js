@@ -1,7 +1,6 @@
 const { User }= require('../db');
 const { hashPassword }= require('../config/hashPassword');
 const { generateRefreshToken }= require('../config/generateRefreshToken');
-const { authMiddleware }= require('../middlewares/authToken');
 
 const userCreation= async(companyName, companyCUIT, taxCondition, firstname, lastname, email, phone, image, password, status)=> {
     const user= await User.findOne({ where : { email: email } });
@@ -58,8 +57,9 @@ const getUsers= async()=> {
     return users;
 }
 
-const getUserInfo= async(id)=> {
-    const user= await User.findByPk(id);
+const getUserInfo= async(userId)=> {  //ver si recibe token o si no --> ver loguin
+   
+    const user= await User.findByPk(userId); 
     const dataUser= {
         firstname: user.firstname,
         email: user.email,
@@ -70,6 +70,5 @@ const getUserInfo= async(id)=> {
     };
     return dataUser;
 }
-
 
 module.exports= { userCreation, userLogin, logOutUserCtr, getUsers, getUserInfo };
