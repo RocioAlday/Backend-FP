@@ -6,7 +6,6 @@ const cheerio = require('cheerio');
 
 const createModelsDB= async (req, res)=> {
     try {
-        console.log(models[1]);
         await Promise.all(models.map(async (el) => { 
           await Model.create(el);
         })); 

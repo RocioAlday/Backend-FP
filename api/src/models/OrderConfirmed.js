@@ -17,7 +17,7 @@ module.exports= (sequelize)=> {
             field: 'TotalBudget'
         },
         status: {
-            type: DataTypes.ENUM("Confirmado", "Impresión Finalizada", "Entregado", "Facturado", "Cobrado", "Cerrada"),
+            type: DataTypes.ENUM("Confirmado", "Presupuesto Confirmado", "Impresión Finalizada", "Entregado", "Facturado", "Cobrado", "Cerrada"),
             allowNull: false,
             defaultValue: "Confirmado",
             field: "Status",
@@ -47,9 +47,9 @@ module.exports= (sequelize)=> {
             type: DataTypes.STRING,
             field: "DeliveredDate"
         },
-        priority: {
-            type: DataTypes.BOOLEAN,
-            defaultValue: false
+        observations: {
+            type: DataTypes.TEXT,
+            field: 'Observations'
         }
     })
 }

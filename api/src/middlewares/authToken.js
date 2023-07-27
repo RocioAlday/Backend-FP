@@ -14,7 +14,7 @@ const authMiddleware= async(req, res, next)=>{
                 next();
             }
         } catch(error){
-            res.status(500).send(error.message, 'Not Authorized, token expired, please login again')
+            res.status(500).json({error: error.message, message:'Not Authorized, token expired, please login again'})
         }
     } else {
         res.status(500).send('There is no token attached to header');
