@@ -1,5 +1,5 @@
 const { newOrder, deleteInOrder, changeOrderStatus, getOrderDetail, changeStatusOD, ordersForBilling, ordersByUser, confirmedOrder, deleteOrderCtrl,
-    changeStatusOrderConfirmed, modifyOrderDashAdmin, changePriority } = require("../controllers/order.controller");
+    changeStatusOrderConfirmed, modifyOrderDashAdmin, changePriority, postDataForBudgetOrder } = require("../controllers/order.controller");
 
 const createOrder= async(req, res)=> {
     const { id }= req.user;
@@ -148,5 +148,17 @@ const modifyPriority= async(req, res)=> {
     }
 }
 
+const dataForBudget= async(req, res)=> {
+    const { id }= req.user;
+    const { orderId, dolarValue, observations }= req.body;
+    console.log(observations)
+    try {
+        const result= await postDataForBudgetOrder(id, orderId, dolarValue, observations);
+        res.status(200).json(result)
+    } catch(error) {
+        res.status(500).json({error: 'Error geting data for budget', message: error.message})
+    }
+}
+
 module.exports= {createOrder, modifyOrder, deleteItemOrder, changeStatus, getOrders, changeStatusOrderDetail, getOrdersForBilling, 
-    getOrdersByUser, addToOrderConfirmed, deleteOrder, changeConfirmedStatusOrder, modifyOrderByAdmin, modifyPriority }
+    getOrdersByUser, addToOrderConfirmed, deleteOrder, changeConfirmedStatusOrder, modifyOrderByAdmin, modifyPriority, dataForBudget }

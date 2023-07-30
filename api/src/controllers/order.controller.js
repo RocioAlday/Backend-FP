@@ -160,6 +160,7 @@ const confirmedOrder= async(id, orderId, status, dolarValue, observations)=> {
  
   if(order && orderDetail){
     var orderConfirmed = await OrderConfirmed.create({
+        id: orderId,
         userId: findUser.id,
         totalBudget: order.totalBudget*dolarValue,
         status: status,
@@ -312,6 +313,25 @@ const changePriority= async(orderId,modelId, priority)=> {
   return newOrder
 }
 
+const postDataForBudgetOrder= async(id, orderId, dolarValue, observations)=> {
+  const findOrder= await Order.findOne({where: {id: orderId},
+    include: [
+      {
+        model: Model,
+        through: {
+          model: OrderDetail,
+          attributes: ['quantity', 'subtotal', 'color']
+        }
+      }
+    ]
+  });
+  return ({
+    order: findOrder,
+    dolarValue: dolarValue,
+    observations: observations
+  })
+}
+
 
 module.exports= {newOrder, deleteInOrder, changeOrderStatus, getOrderDetail, changeStatusOD, ordersForBilling, ordersByUser, 
-  confirmedOrder, deleteOrderCtrl, changeStatusOrderConfirmed, modifyOrderDashAdmin, changePriority}
+  confirmedOrder, deleteOrderCtrl, changeStatusOrderConfirmed, modifyOrderDashAdmin, changePriority, postDataForBudgetOrder}
