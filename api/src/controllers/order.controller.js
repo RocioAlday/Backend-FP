@@ -1,4 +1,5 @@
 const { User, Cart, Order, Model, OrderDetail, OrderConfirmed }= require('../db');
+const fs = require("fs");
 
 const newOrder= async(id) => {
   const findUser= await User.findByPk(id); 
@@ -331,6 +332,7 @@ const postDataForBudgetOrder= async(id, orderId, dolarValue, observations)=> {
     observations: observations
   })
 }
+
 
 
 module.exports= {newOrder, deleteInOrder, changeOrderStatus, getOrderDetail, changeStatusOD, ordersForBilling, ordersByUser, 
