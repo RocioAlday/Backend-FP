@@ -1,6 +1,6 @@
 const { newOrder, deleteInOrder, changeOrderStatus, getOrderDetail, changeStatusOD, ordersForBilling, ordersByUser, confirmedOrder, deleteOrderCtrl,
-    changeStatusOrderConfirmed, modifyOrderDashAdmin, changePriority, postDataForBudgetOrder } = require("../controllers/order.controller");
-const { transporter } = require("../config/nodemailer");
+    changeStatusOrderConfirmed, modifyOrderDashAdmin, changePriority, postDataForBudgetOrder, sendBudgetEmail } = require("../controllers/order.controller");
+
 
 const createOrder= async(req, res)=> {
     const { id }= req.user;
@@ -162,21 +162,10 @@ const dataForBudget= async(req, res)=> {
 }
 
 const sendPDFByEmail= async(req, res)=> {
-
-    const pdf= req.body;   //recibir tmb el token del usuario
+    const { id }= req.user;
+    const pdf= req.body;  
     try {
-        const mailOptions = {
-          from:  process.env.USER_GMAIL,
-          to: 'MAIL_DEL_USUARIO',   //CAMBIARLO
-          subject: "Presupuesto",
-          text: "Adjuntamos el presupuesto solicitado.",
-          attachments: [{ filename: "presupuesto.pdf",  content: pdf }],
-        };
-      
-        transporter.sendMail(mailOptions, (error, info) => {
-          if (error) throw new Error(`Error sending mail: ${error}`);
-        });
-        
+        await sendBudgetEmail(id, pdf);
         res.send("Email successfully sent.");
 
     } catch (error) {

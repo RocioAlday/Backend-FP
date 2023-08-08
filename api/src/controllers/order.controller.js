@@ -1,5 +1,10 @@
 const { User, Cart, Order, Model, OrderDetail, OrderConfirmed }= require('../db');
-const fs = require("fs");
+const { transporter } = require("../config/nodemailer");
+const fs = require('fs');
+
+const imagePath = 'src/images/contact-image.png';
+const imageData = fs.readFileSync(imagePath); // Lee la imagen como un archivo binario
+const base64Image = imageData.toString('base64'); // Convierte los datos binarios en una cadena Base64
 
 const newOrder= async(id) => {
   const findUser= await User.findByPk(id); 
@@ -333,7 +338,55 @@ const postDataForBudgetOrder= async(id, orderId, dolarValue, observations)=> {
   })
 }
 
+const sendBudgetEmail= async(id, pdf)=> {
+  const findUser= await User.findByPk(id); 
+  const USER_EMAIL= findUser.email;
+
+  const mailOptions = {
+    from:  process.env.USER_GMAIL,
+    to: USER_EMAIL,   
+    subject: "Presupuesto",
+
+    html:
+        `
+            <table border="0" cellpadding="0" cellspacing="0" width="900px">
+            <tr>
+                <td style="text-align:left">
+                <p style="color: #000"><em>Estimado Cliente, nos complace que estés considerando nuestro presupuesto. 
+                    Si tienes alguna pregunta o necesitas más información antes de tomar una decisión, no dudes en contactarte con nosotros. <br/>
+                    ¡Estamos para ayudarte en lo que necesites! <br/><br/>
+                    Adjuntamos el presupuesto solicitado. <br/>
+                    ¡Gracias por considerar nuestra propuesta! </em><br/><br/>
+                    <strong>El Equipo de FullPrism.</strong>
+                    </p>
+                </td>
+            </tr>
+            <tr height="200px">  
+                <td width="400px">
+                    <img src="cid:imagen-contacto" width="400px" />
+                </td>
+            </tr>
+           
+        </table>
+            </body>
+        </html>`
+    ,
+
+    attachments: [
+      { filename: "presupuesto.pdf",  
+         content: pdf }, 
+      {
+        filename: 'datos-contacto.png',
+        content: imageData,
+        cid: 'imagen-contacto'
+      },],
+  };
+
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) throw new Error(`Error sending mail: ${error}`);
+  });
+}
 
 
 module.exports= {newOrder, deleteInOrder, changeOrderStatus, getOrderDetail, changeStatusOD, ordersForBilling, ordersByUser, 
-  confirmedOrder, deleteOrderCtrl, changeStatusOrderConfirmed, modifyOrderDashAdmin, changePriority, postDataForBudgetOrder}
+  confirmedOrder, deleteOrderCtrl, changeStatusOrderConfirmed, modifyOrderDashAdmin, changePriority, postDataForBudgetOrder, sendBudgetEmail}
