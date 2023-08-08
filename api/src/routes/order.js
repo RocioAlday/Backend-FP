@@ -17,6 +17,6 @@ router.post("/orderConfirmed", authMiddleware, addToOrderConfirmed)
 router.get("/openOrders", authMiddleware, getOrdersByUser);
 router.post("/changeConfirmOrderStatus", authMiddleware, changeConfirmedStatusOrder);
 router.post("/dataForBudget", authMiddleware, dataForBudget);
-router.post("/sendBudgetByEmail", sendPDFByEmail)
+router.post("/sendBudgetByEmail", authMiddleware, sendPDFByEmail)
 
 module.exports= router;
