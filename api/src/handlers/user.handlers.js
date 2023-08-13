@@ -1,4 +1,4 @@
-const { userCreation, userLogin, logOutUserCtr, getUsers, getUserInfo }= require('../controllers/user.controllers');
+const { userCreation, userLogin, logOutUserCtr, getUsers, getUserInfo, sendMailContact }= require('../controllers/user.controllers');
 const jwt= require('jsonwebtoken');
 
 const newUser= async (req, res)=> {
@@ -91,4 +91,15 @@ const getUserInfoForBilling= async(req, res)=> {
     }
 }
 
-module.exports= { newUser, loginUser, logoutUser, allUsers, getUserData, getUserInfoForBilling }
+const sendQueryByEmail= async (req, res)=> {
+    const { nombre, empresa, email, tel, msg } = req.body;
+    try {
+        const sendMail= await sendMailContact(nombre, empresa, email, tel, msg);
+        res.status(200).json({message:sendMail})
+
+    } catch(error){
+        res.status(500).json({error: 'Error sending query contact by mail', message: error.message});
+    }
+}
+
+module.exports= { newUser, loginUser, logoutUser, allUsers, getUserData, getUserInfoForBilling, sendQueryByEmail }
