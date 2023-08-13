@@ -1,6 +1,8 @@
 const { User }= require('../db');
 const { hashPassword }= require('../config/hashPassword');
 const { generateRefreshToken }= require('../config/generateRefreshToken');
+const { transporter } = require ('../config/nodemailer');
+const { EMAIL_FULLPRISM } = process.env;
 
 const userCreation= async(companyName, companyCUIT, taxCondition, firstname, lastname, email, phone, image, password, status)=> {
     const user= await User.findOne({ where : { email: email } });
@@ -71,4 +73,23 @@ const getUserInfo= async(userId)=> {  //ver si recibe token o si no --> ver logu
     return dataUser;
 }
 
-module.exports= { userCreation, userLogin, logOutUserCtr, getUsers, getUserInfo };
+const sendMailContact= async(nombre, empresa, email, tel, msg)=> {
+   
+    const mail = {
+      from: nombre,
+      to: `${EMAIL_FULLPRISM}`,
+      subject: "FORMULARIO DE CONTACTO - WEB",
+      html: `<p>Name: ${nombre}</p>
+             <p>Empresa: ${empresa}</p>
+             <p>Email: ${email}</p>
+             <p>Teléfono: ${tel}</p>
+             <p>Mensaje: ${msg}</p>`,
+    };
+    transporter.sendMail(mail, (error) => {
+      if (error) throw new Error(error);
+      return ("Mensaje enviado satisfactoriamente" );
+      
+    });
+}
+
+module.exports= { userCreation, userLogin, logOutUserCtr, getUsers, getUserInfo, sendMailContact };
