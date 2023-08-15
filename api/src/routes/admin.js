@@ -6,7 +6,7 @@ const { changeStatusOrderDetail, getOrders, getOrdersForBilling, modifyOrderByAd
 const router= Router();
 
 
-router.post("/modifyModel", modifyModel);
+router.put("/modifyModel", modifyModel);
 router.get("/allModels", allModels);
 router.put("/modifyStatusOrderDetail",changeStatusOrderDetail);
 router.get("/allOrders", getOrders)
