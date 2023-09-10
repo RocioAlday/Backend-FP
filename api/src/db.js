@@ -12,7 +12,7 @@ const bcrypt= require('bcrypt');
 const sequelize = new Sequelize(`${DB_URL}`, {
   logging: false, // set to console.log to see the raw SQL queries
   native: false, // lets Sequelize know we can use pg-native for ~30% more speed
-  ssl: false,
+  ssl: true,
 });
 
 // const sequelize = new Sequelize(`postgres://${DB_USER}:${DB_PASSWORD}@localhost:${DB_HOST}/fullprism`, {
