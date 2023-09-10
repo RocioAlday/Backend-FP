@@ -106,11 +106,11 @@ const changeStatusOD= async(status, orderId, modelId)=> {
   const notDelivered= resultDetail.filter(m=> m.status !== 'Entregado');
   
   let date= new Date();
-  if(!anyStatusPending.length && status === 'Impresión Finalizada'){
+  if(anyStatusPending.length < 1 && status === 'Impresión Finalizada'){
     let order= await OrderConfirmed.findByPk(orderId);
       await order.update({status: 'Impresión Finalizada', dataDetail: resultDetail, finishPrintDate: date.toISOString() });
      return order
-  } else if (!notDelivered.length && status === 'Entregado') {
+  } else if (notDelivered.length < 1 && status === 'Entregado') {
     let order= await OrderConfirmed.findByPk(orderId);
     await order.update({status: 'Entregado', dataDetail: resultDetail, deliveredDate: date.toISOString()});
    return order
@@ -280,12 +280,13 @@ const modifyOrderDashAdmin= async(orderId, modelId, status, quantity, material, 
   let restOfModels= orderDetail.filter(d=> d.modelId !== modelId);  
   let filterByModel= orderDetail.find(d=> d.modelId === modelId);
   filterByModel.status = status; 
+  console.log(filterByModel);
   filterByModel.quantity= Number(quantity);
   filterByModel.subtotal= modelPrice * Number(quantity) * Number(order.dolarValue);
   filterByModel.color= color;
 
   const resultDetail= restOfModels.concat(filterByModel);
-
+console.log('RESUTL DETAIL:', resultDetail);
   let totalPrice= 0;
   for (const model of resultDetail) {
     totalPrice += model.subtotal;
@@ -295,15 +296,16 @@ const modifyOrderDashAdmin= async(orderId, modelId, status, quantity, material, 
   const anyPendingBill= resultDetail.filter(m=> m.status !== 'Facturado');
   const anyPendignCollect= resultDetail.filter(m => m.status !== 'Cobrado');
   let date= new Date();
-  if(!anyPendingDeliver.length || !anyPendingBill.length || !anyPendignCollect.length){
-    let changeDate= !anyPendingDeliver.length? 'deliveredDate' : (!anyPendingBill.length? 'billedDate' : 'collectDate');
+  if(anyPendingDeliver.length <1 || anyPendingBill.length <1 || anyPendignCollect.length <1){
+    let changeDate= anyPendingDeliver.length <1 ? 'deliveredDate' : (anyPendingBill.length <1 ? 'billedDate' : 'collectDate');
    
-    await order.update({ status: status, totalBudget: totalPrice, dataDetail: resultDetail, [changeDate]: date.toISOString()});
-    return order
+    let updateOrder= await OrderConfirmed.findByPk(orderId);
+    await updateOrder.update({ status: status, totalBudget: totalPrice, dataDetail: resultDetail, [changeDate]: date.toISOString()});
+    return updateOrder
   }
-
-  await order.update({ status: status, totalBudget: totalPrice, dataDetail: resultDetail});
-  return order;
+  let updateOrder= await OrderConfirmed.findByPk(orderId);
+  await updateOrder.update({ status: status, totalBudget: totalPrice, dataDetail: resultDetail});
+  return updateOrder;
 }
 
 const changePriority= async(orderId,modelId, priority)=> {

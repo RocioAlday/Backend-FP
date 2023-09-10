@@ -6,7 +6,7 @@ const { changeStatusOrderDetail, getOrders, getOrdersForBilling, modifyOrderByAd
 const router= Router();
 
 
-router.put("/modifyModel", modifyModel);
+router.put("/modifyModel", modifyModel);   //agregar control de token role para admin en todas estas rutas , separar las que son del OPERARIO y lAS del ADMIN 
 router.get("/allModels", allModels);
 router.put("/modifyStatusOrderDetail",changeStatusOrderDetail);
 router.get("/allOrders", getOrders)
