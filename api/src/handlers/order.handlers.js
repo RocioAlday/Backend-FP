@@ -110,7 +110,7 @@ const getOrdersByUser= async(req, res)=> {
 
 const changeStatusOrderDetail= async (req, res)=> {
     let { status, orderId, modelId }= req.body;
-    console.log(status, orderId, modelId);
+    console.log(status, `OID: ${orderId}`, `ModelID: ${modelId}`);
     try{
         const changeStatus= await changeStatusOD(status, orderId, modelId);
         res.status(200).json(changeStatus)
@@ -130,7 +130,7 @@ const getOrdersForBilling= async(req, res)=> {
 
 const modifyOrderByAdmin= async(req, res)=> {
     const { orderId, modelId, status, quantity, material, color }= req.body;
-
+    console.log(orderId, modelId, status, quantity, material, color);
     try {
         const modified= await modifyOrderDashAdmin(orderId, modelId, status, quantity, material, color);
         res.status(200).json(modified)
