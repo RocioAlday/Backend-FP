@@ -14,7 +14,7 @@ server.use(cookieParser());
 server.use(morgan('dev'));
 server.use(
   cors({
-    origin: 'http://127.0.0.1:5173',
+    origin: 'https://frontend-fp.vercel.app',
     credentials: true,
     methods: ['GET', 'POST', 'OPTIONS', 'PUT', 'DELETE'],
     allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization'],
