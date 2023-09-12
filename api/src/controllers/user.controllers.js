@@ -4,7 +4,7 @@ const { generateRefreshToken }= require('../config/generateRefreshToken');
 const { transporter } = require ('../config/nodemailer');
 const { EMAIL_FULLPRISM } = process.env;
 
-const userCreation= async(companyName, companyCUIT, taxCondition, firstname, lastname, email, phone, image, password, status)=> {
+const userCreation= async(companyName, companyCUIT, taxCondition, firstname, lastname, email, phone, image, password, role)=> {
     const user= await User.findOne({ where : { email: email } });
     if (user) throw new Error ('This e-mail is already in use, please use another email');
 
@@ -18,7 +18,7 @@ const userCreation= async(companyName, companyCUIT, taxCondition, firstname, las
         phone,
         image,
         password,
-        status
+        role
     });
 
     const hashPass= await hashPassword(userCreate); 
@@ -59,7 +59,7 @@ const getUsers= async()=> {
     return users;
 }
 
-const getUserInfo= async(userId)=> {  //ver si recibe token o si no --> ver loguin
+const getUserInfo= async(userId)=> {  
    
     const user= await User.findByPk(userId); 
     const dataUser= {
