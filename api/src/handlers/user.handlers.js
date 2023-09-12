@@ -2,9 +2,9 @@ const { userCreation, userLogin, logOutUserCtr, getUsers, getUserInfo, sendMailC
 const jwt= require('jsonwebtoken');
 
 const newUser= async (req, res)=> {
-    const { companyName, companyCUIT, taxCondition, firstname, lastname, email, phone, image, password, status }= req.body;
+    const { companyName, companyCUIT, taxCondition, firstname, lastname, email, phone, image, password, role }= req.body;
     try {
-        const user= await userCreation(companyName, companyCUIT, taxCondition, firstname, lastname, email, phone, image, password, status); 
+        const user= await userCreation(companyName, companyCUIT, taxCondition, firstname, lastname, email, phone, image, password, role); 
         res.status(201).send({ userData: user });
     } catch(error) {
         res.status(500).json({ error: 'Error in user creation', message: error.message })
