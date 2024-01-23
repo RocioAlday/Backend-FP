@@ -6,6 +6,7 @@ const {
     DB_USER, DB_PASSWORD, DB_HOST, DATABASE_URL
 } = process.env;
 const bcrypt= require('bcrypt');
+const basename = path.basename(__filename);
 
 //Acá iria la instancia de sequelize con los datos que tengo en env
 
@@ -18,9 +19,6 @@ const sequelize = new Sequelize(`postgres://${DB_USER}:${DB_PASSWORD}@localhost:
     logging: false, // set to console.log to see the raw SQL queries
     native: false, // lets Sequelize know we can use pg-native for ~30% more speed
   });  
-
-
-const basename = path.basename(__filename);
 
 const modelDefiners = [];
 
