@@ -16,10 +16,10 @@ const createModelsDB= async (req, res)=> {
 };
 
 const newSTLModel= async(req, res)=> {
-    const { name, material, link, price, companyName, image }= req.body;
+    const { name, material, link, price, companyName, image, parameters }= req.body;
 
     try {
-        const model= await createModel(name, material, link, price, companyName, image);
+        const model= await createModel(name, material, link, price, companyName, image, parameters);
         res.status(200).json(model);
 
     } catch(error) {

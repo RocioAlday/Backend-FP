@@ -9,15 +9,15 @@ const bcrypt= require('bcrypt');
 
 //Acá iria la instancia de sequelize con los datos que tengo en env
 
-const sequelize = new Sequelize(`${DATABASE_URL}`, {
-  logging: false, // set to console.log to see the raw SQL queries
-  native: false, // lets Sequelize know we can use pg-native for ~30% more speed
-});
+// const sequelize = new Sequelize(`${DATABASE_URL}`, {
+//   logging: false, // set to console.log to see the raw SQL queries
+//   native: false, // lets Sequelize know we can use pg-native for ~30% more speed
+// });
 
-// const sequelize = new Sequelize(`postgres://${DB_USER}:${DB_PASSWORD}@localhost:${DB_HOST}/fullprism`, {
-//     logging: false, // set to console.log to see the raw SQL queries
-//     native: false, // lets Sequelize know we can use pg-native for ~30% more speed
-//   });  
+const sequelize = new Sequelize(`postgres://${DB_USER}:${DB_PASSWORD}@localhost:${DB_HOST}/fullprism`, {
+    logging: false, // set to console.log to see the raw SQL queries
+    native: false, // lets Sequelize know we can use pg-native for ~30% more speed
+  });  
 
 
 const basename = path.basename(__filename);

@@ -1,14 +1,15 @@
 const { Model, User }= require('../db');
 
 
-const createModel= async(name, material, link, price, companyName, image)=> {
+const createModel= async(name, material, link, price, companyName, image, parameters)=> {
     const model= Model.create({
         name,
         material,
         link,
         price,
         companyName,
-        image
+        image,
+        parameters
     });
 
     return model;
